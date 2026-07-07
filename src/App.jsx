@@ -6,6 +6,7 @@ import MahasiswaLayout from "./layouts/MahasiswaLayout";
 import TutorLayout from "./layouts/TutorLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import KepalaLayout from "./layouts/KepalaLayout";
+import RektoratLayout from "./layouts/RektoratLayout";
 
 import DashboardMahasiswa from "./pages/mahasiswa/Dashboard";
 import Administrasi from "./pages/mahasiswa/Administrasi";
@@ -29,18 +30,17 @@ import PelaporanDanEkspor from "./pages/kepala/PelaporanDanEkspor";
 import ManajemenPengguna from "./pages/kepala/ManajemenPengguna";
 
 import DashboardRektorat from "./pages/rektorat/Dashboard";
+import LaporanAkademik from "./pages/rektorat/LaporanAkademik";
+import LaporanKeuangan from "./pages/rektorat/LaporanKeuangan";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* ========================= LOGIN ========================= */}
-
         <Route path="/" element={<Login />} />
 
         {/* ======================= MAHASISWA ======================= */}
-
         <Route path="/mahasiswa" element={<MahasiswaLayout />}>
           <Route path="dashboard" element={<DashboardMahasiswa />} />
           <Route path="administrasi" element={<Administrasi />} />
@@ -49,7 +49,6 @@ function App() {
         </Route>
 
         {/* ========================= TUTOR ========================= */}
-
         <Route path="/tutor" element={<TutorLayout />}>
           <Route path="dashboard" element={<DashboardTutor />} />
           <Route path="kelasku" element={<KelaskuTutor />} />
@@ -58,33 +57,28 @@ function App() {
         </Route>
 
         {/* ====================== ADMIN BTA ======================== */}
-
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<DashboardAdmin />} />
           <Route path="validasi-administrasi" element={<ValidasiAdministrasi />} />
           <Route path="tes-penempatan" element={<TesPenempatan />} />
           <Route path="manajemen-kelas" element={<ManajemenKelas />} />
           <Route path="validasi-nilai" element={<ValidasiNilai />} />
-
-
         </Route>
 
         {/* ===================== KEPALA PUSAT ====================== */}
-
         <Route path="/kepala" element={<KepalaLayout />}>
           <Route path="dashboard" element={<DashboardKepala />} />
           <Route path="pengesahan-kelulusan" element={<PengesahanKelulusan />} />
           <Route path="pelaporan" element={<PelaporanDanEkspor />} />
           <Route path="manajemen-pengguna" element={<ManajemenPengguna />} />
-          
         </Route>
 
         {/* ======================= REKTORAT ======================== */}
-
-        <Route
-          path="/rektorat/dashboard"
-          element={<DashboardRektorat />}
-        />
+        <Route path="/rektorat" element={<RektoratLayout />}>
+          <Route path="dashboard" element={<DashboardRektorat />} />
+          <Route path="laporan-akademik" element={<LaporanAkademik />} />
+          <Route path="laporan-keuangan" element={<LaporanKeuangan />} />
+        </Route>
 
       </Routes>
     </BrowserRouter>
