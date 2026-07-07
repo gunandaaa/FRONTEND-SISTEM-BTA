@@ -4,6 +4,7 @@ import Login from "./pages/auth/Login";
 
 import MahasiswaLayout from "./layouts/MahasiswaLayout";
 import TutorLayout from "./layouts/TutorLayout";
+import AdminLayout from "./layouts/AdminLayout";
 
 import DashboardMahasiswa from "./pages/mahasiswa/Dashboard";
 import Administrasi from "./pages/mahasiswa/Administrasi";
@@ -16,6 +17,11 @@ import PresensiTutor from "./pages/tutor/Presensi";
 import PenilaianTutor from "./pages/tutor/Penilaian";
 
 import DashboardAdmin from "./pages/admin_bta/Dashboard";
+import ValidasiAdministrasi from "./pages/admin_bta/ValidasiAdministrasi";
+import TesPenempatan from "./pages/admin_bta/TesPenempatan";
+import ManajemenKelas from "./pages/admin_bta/ManajemenKelas";
+import ValidasiNilai from "./pages/admin_bta/ValidasiNilai";
+
 import DashboardKepala from "./pages/kepala/Dashboard";
 import DashboardRektorat from "./pages/rektorat/Dashboard";
 
@@ -24,10 +30,11 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* Login */}
+        {/* ========================= LOGIN ========================= */}
+
         <Route path="/" element={<Login />} />
 
-        {/* ====================== MAHASISWA ====================== */}
+        {/* ======================= MAHASISWA ======================= */}
 
         <Route path="/mahasiswa" element={<MahasiswaLayout />}>
           <Route path="dashboard" element={<DashboardMahasiswa />} />
@@ -36,7 +43,7 @@ function App() {
           <Route path="hasil-studi" element={<HasilStudi />} />
         </Route>
 
-        {/* ======================== TUTOR ======================== */}
+        {/* ========================= TUTOR ========================= */}
 
         <Route path="/tutor" element={<TutorLayout />}>
           <Route path="dashboard" element={<DashboardTutor />} />
@@ -45,21 +52,26 @@ function App() {
           <Route path="penilaian" element={<PenilaianTutor />} />
         </Route>
 
-        {/* ===================== ADMIN BTA ======================= */}
+        {/* ====================== ADMIN BTA ======================== */}
 
-        <Route
-          path="/admin/dashboard"
-          element={<DashboardAdmin />}
-        />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<DashboardAdmin />} />
+          <Route path="validasi-administrasi" element={<ValidasiAdministrasi />} />
+          <Route path="tes-penempatan" element={<TesPenempatan />} />
+          <Route path="manajemen-kelas" element={<ManajemenKelas />} />
+          <Route path="validasi-nilai" element={<ValidasiNilai />} />
 
-        {/* ==================== KEPALA PUSAT ===================== */}
+
+        </Route>
+
+        {/* ===================== KEPALA PUSAT ====================== */}
 
         <Route
           path="/kepala/dashboard"
           element={<DashboardKepala />}
         />
 
-        {/* ====================== REKTORAT ======================= */}
+        {/* ======================= REKTORAT ======================== */}
 
         <Route
           path="/rektorat/dashboard"
