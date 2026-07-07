@@ -5,6 +5,7 @@ import Login from "./pages/auth/Login";
 import MahasiswaLayout from "./layouts/MahasiswaLayout";
 import TutorLayout from "./layouts/TutorLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import KepalaLayout from "./layouts/KepalaLayout";
 
 import DashboardMahasiswa from "./pages/mahasiswa/Dashboard";
 import Administrasi from "./pages/mahasiswa/Administrasi";
@@ -23,6 +24,10 @@ import ManajemenKelas from "./pages/admin_bta/ManajemenKelas";
 import ValidasiNilai from "./pages/admin_bta/ValidasiNilai";
 
 import DashboardKepala from "./pages/kepala/Dashboard";
+import PengesahanKelulusan from "./pages/kepala/PengesahanKelulusan";
+import PelaporanDanEkspor from "./pages/kepala/PelaporanDanEkspor";
+import ManajemenPengguna from "./pages/kepala/ManajemenPengguna";
+
 import DashboardRektorat from "./pages/rektorat/Dashboard";
 
 function App() {
@@ -66,10 +71,13 @@ function App() {
 
         {/* ===================== KEPALA PUSAT ====================== */}
 
-        <Route
-          path="/kepala/dashboard"
-          element={<DashboardKepala />}
-        />
+        <Route path="/kepala" element={<KepalaLayout />}>
+          <Route path="dashboard" element={<DashboardKepala />} />
+          <Route path="pengesahan-kelulusan" element={<PengesahanKelulusan />} />
+          <Route path="pelaporan" element={<PelaporanDanEkspor />} />
+          <Route path="manajemen-pengguna" element={<ManajemenPengguna />} />
+          
+        </Route>
 
         {/* ======================= REKTORAT ======================== */}
 
