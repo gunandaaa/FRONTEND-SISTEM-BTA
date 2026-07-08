@@ -44,7 +44,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
 
         {/* ========================= LOGIN ========================= */}
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
 
         {/* ======================= MAHASISWA ======================= */}
         <Route path="/mahasiswa" element={<MahasiswaLayout />}>
