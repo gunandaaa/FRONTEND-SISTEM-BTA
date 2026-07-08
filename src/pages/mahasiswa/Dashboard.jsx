@@ -3,7 +3,7 @@ function Dashboard() {
     <div>
 
       <h1 className="text-3xl font-bold mb-6">
-        Assalamu'alaikum,
+        Assalamu'alaikum, Mahasiswa/i
       </h1>
 
       <div className="grid grid-cols-3 gap-6">
