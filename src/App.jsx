@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/auth/Login";
 
+// --- IMPORT LANDING PAGE ---
+import LandingPage from "./pages/LandingPage";
+
 import MahasiswaLayout from "./layouts/MahasiswaLayout";
 import TutorLayout from "./layouts/TutorLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -37,6 +40,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* ======================= PUBLIK ========================== */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* ========================= LOGIN ========================= */}
         <Route path="/" element={<Login />} />
 
