@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 
 const PelaporanDanEkspor = () => {
-  // Master Data Laporan (Dummy Database)
   const [masterData] = useState([
     {
       id: 1,
@@ -69,17 +68,14 @@ const PelaporanDanEkspor = () => {
     }
   ]);
 
-  // State untuk Multi-Filter dan Pencarian
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFakultas, setFilterFakultas] = useState("");
   const [filterProdi, setFilterProdi] = useState("");
   const [filterMQ, setFilterMQ] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // State untuk menu dropdown ekspor
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // Logika penyaringan data bersusun (Multi-Level Filtering)
   const filteredData = masterData.filter(item => {
     const matchSearch = item.nama.toLowerCase().includes(searchTerm.toLowerCase()) || item.nim.includes(searchTerm) || item.noSertifikat.toLowerCase().includes(searchTerm.toLowerCase());
     const matchFakultas = filterFakultas ? item.fakultas === filterFakultas : true;
@@ -90,49 +86,54 @@ const PelaporanDanEkspor = () => {
     return matchSearch && matchFakultas && matchProdi && matchMQ && matchStatus;
   });
 
-  // Aksi Ekspor Laporan
   const handleExport = (format) => {
     alert(`Mengekspor ${filteredData.length} baris data ke format ${format.toUpperCase()}...\n\nProses unduhan akan segera dimulai.`);
-    setShowExportMenu(false); // Tutup menu setelah klik
+    setShowExportMenu(false);
   };
 
+  // ==========================================
+  // TAMPILAN UI/UX BTA (DIPERBARUI)
+  // ==========================================
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="space-y-8 animate-fade-in-up font-sans">
+      
       {/* Header Halaman */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <Database size={24} className="text-emerald-600" />
+          <h1 className="text-3xl font-black text-bta-green tracking-tight flex items-center gap-3">
+            <div className="bg-bta-green/10 p-2.5 rounded-xl text-bta-green">
+              <Database size={24} />
+            </div>
             Pelaporan & Ekspor Data
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Pusat master data analitik. Gunakan filter untuk menyaring laporan spesifik dan cetak dokumen resmi.
+          <p className="text-gray-500 mt-2 font-medium">
+            Pusat master data analitik. Gunakan filter untuk menyaring laporan dan cetak dokumen resmi.
           </p>
         </div>
         
-        {/* Tombol Ekspor dengan Dropdown */}
+        {/* Tombol Ekspor Dropdown */}
         <div className="relative">
           <button 
             onClick={() => setShowExportMenu(!showExportMenu)}
-            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-sm transition-colors w-full md:w-auto"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-bta-yellow hover:bg-yellow-400 text-bta-black font-black text-sm py-3.5 px-6 rounded-xl shadow-[0_4px_14px_0_rgba(250,234,41,0.39)] hover:shadow-[0_6px_20px_rgba(250,234,41,0.23)] hover:-translate-y-0.5 transition-all duration-300"
           >
-            <Download size={18} />
+            <Download size={18} strokeWidth={2.5} />
             <span>Unduh Laporan</span>
-            <ChevronDown size={16} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+            <ChevronDown size={18} strokeWidth={2.5} className={`transition-transform duration-300 ${showExportMenu ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Opsi Dropdown Format Ekspor */}
           {showExportMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-lg z-10 overflow-hidden animate-in fade-in slide-in-from-top-2">
-              <div className="p-1">
-                <button onClick={() => handleExport('pdf')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition-colors">
-                  <FileText size={16} className="text-rose-500" /> Unduh sbg PDF
+            <div className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2">
+              <div className="p-2 space-y-1">
+                <button onClick={() => handleExport('pdf')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors">
+                  <FileText size={18} className="text-red-500" /> Unduh format PDF
                 </button>
-                <button onClick={() => handleExport('excel')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-colors">
-                  <FileSpreadsheet size={16} className="text-emerald-500" /> Unduh sbg Excel
+                <button onClick={() => handleExport('excel')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-green-50 hover:text-bta-green rounded-xl transition-colors">
+                  <FileSpreadsheet size={18} className="text-bta-green" /> Unduh format Excel
                 </button>
-                <button onClick={() => handleExport('word')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                  <FileWord size={16} className="text-blue-500" /> Unduh sbg Word
+                <button onClick={() => handleExport('word')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-colors">
+                  <FileWord size={18} className="text-blue-500" /> Unduh format Word
                 </button>
               </div>
             </div>
@@ -141,24 +142,24 @@ const PelaporanDanEkspor = () => {
       </div>
 
       {/* Area Multi-Filter Dropdown */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-col gap-4">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-700 border-b border-slate-100 pb-2">
-          <Filter size={16} className="text-emerald-600" />
-          Filter & Pencarian Spesifik
+      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-5">
+        <div className="flex items-center gap-2 text-sm font-black text-bta-green border-b border-gray-100 pb-3">
+          <Filter size={18} />
+          Filter & Pencarian Laporan Spesifik
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* 1. Kolom Pencarian Teks */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
               <Search size={16} />
             </span>
             <input 
               type="text"
-              placeholder="Cari Nama/NIM..."
+              placeholder="Cari Nama/NIM/Sertifikat..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 text-slate-700"
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-700 transition-all placeholder:text-gray-400"
             />
           </div>
 
@@ -166,7 +167,7 @@ const PelaporanDanEkspor = () => {
           <select 
             value={filterFakultas} 
             onChange={(e) => setFilterFakultas(e.target.value)}
-            className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 text-slate-700 cursor-pointer"
+            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green cursor-pointer appearance-none transition-all"
           >
             <option value="">Semua Fakultas</option>
             <option value="Ilmu Pendidikan">Ilmu Pendidikan</option>
@@ -178,7 +179,7 @@ const PelaporanDanEkspor = () => {
           <select 
             value={filterProdi} 
             onChange={(e) => setFilterProdi(e.target.value)}
-            className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 text-slate-700 cursor-pointer"
+            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green cursor-pointer appearance-none transition-all"
           >
             <option value="">Semua Program Studi</option>
             <option value="Pendidikan Agama Islam">Pend. Agama Islam</option>
@@ -191,7 +192,7 @@ const PelaporanDanEkspor = () => {
           <select 
             value={filterMQ} 
             onChange={(e) => setFilterMQ(e.target.value)}
-            className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 text-slate-700 cursor-pointer"
+            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green cursor-pointer appearance-none transition-all"
           >
             <option value="">Semua Tingkat MQ</option>
             <option value="MQ 1">Tingkat MQ 1</option>
@@ -202,7 +203,7 @@ const PelaporanDanEkspor = () => {
           <select 
             value={filterStatus} 
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 text-slate-700 cursor-pointer"
+            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green cursor-pointer appearance-none transition-all"
           >
             <option value="">Semua Status Hasil</option>
             <option value="Lulus">Lulus</option>
@@ -212,92 +213,89 @@ const PelaporanDanEkspor = () => {
       </div>
 
       {/* Tabel Master Data Komprehensif */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="bg-slate-900 text-white text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4 rounded-tl-2xl">Nama & NIM</th>
-                <th className="p-4">Fakultas / Prodi</th>
-                <th className="p-4 text-center">Tingkat MQ</th>
-                <th className="p-4 text-center">Tes Awal</th>
-                <th className="p-4 text-center">Kehadiran</th>
-                <th className="p-4 text-center">Nilai Akhir</th>
-                <th className="p-4 text-center">Status</th>
-                <th className="p-4 rounded-tr-2xl">No. Sertifikat</th>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="p-5 text-xs font-black text-bta-green uppercase tracking-wider">Identitas Mahasiswa</th>
+                <th className="p-5 text-xs font-black text-bta-green uppercase tracking-wider">Fakultas & Prodi</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider">Tingkat MQ</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider">Kehadiran</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider">Nilai Akhir</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider">Status Validasi</th>
+                <th className="p-5 text-xs font-black text-bta-green uppercase tracking-wider">Nomor Sertifikat</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+            <tbody className="divide-y divide-gray-50 text-sm text-gray-700 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="p-8 text-center text-slate-400 font-medium">
-                    Tidak ada data laporan yang cocok dengan kombinasi filter Anda.
+                  <td colSpan="8" className="p-12 text-center text-gray-400 font-medium">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Search size={32} className="text-gray-300" />
+                      <p>Tidak ada data laporan yang cocok dengan kombinasi filter Anda.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-colors duration-150">
-                    {/* Profil */}
-                    <td className="p-4">
-                      <div className="font-bold text-slate-800">{item.nama}</div>
-                      <div className="text-xs text-slate-500 font-mono mt-0.5">{item.nim}</div>
+                  <tr key={item.id} className="hover:bg-gray-50/80 transition-colors duration-150">
+                    
+                    {/* Identitas */}
+                    <td className="p-5">
+                      <div className="font-bold text-gray-800">{item.nama}</div>
+                      <div className="text-xs text-gray-400 font-mono mt-1">{item.nim}</div>
                     </td>
                     
                     {/* Akademik */}
-                    <td className="p-4">
-                      <div className="font-medium text-slate-700">{item.fakultas}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">{item.prodi}</div>
+                    <td className="p-5">
+                      <div className="font-bold text-gray-700">{item.fakultas}</div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">{item.prodi}</div>
                     </td>
                     
-                    {/* MQ */}
-                    <td className="p-4 text-center font-semibold text-slate-600">
-                      {item.tingkatMQ}
-                    </td>
-
-                    {/* Tes Awal */}
-                    <td className="p-4 text-center">
-                      <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold border border-slate-200">
-                        {item.nilaiAwal}
-                      </span>
+                    {/* MQ & Tes Awal digabung untuk kebersihan */}
+                    <td className="p-5 text-center">
+                      <div className="font-black text-bta-green text-lg">{item.tingkatMQ}</div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pre-Test: {item.nilaiAwal}</div>
                     </td>
 
                     {/* Kehadiran */}
-                    <td className="p-4 text-center">
-                      <span className="text-xs font-medium text-slate-600 tracking-wide">
+                    <td className="p-5 text-center">
+                      <span className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-black tracking-widest border border-gray-200 inline-block">
                         {item.kehadiran}
                       </span>
                     </td>
 
                     {/* Nilai Akhir */}
-                    <td className="p-4 text-center">
-                      <span className="text-base font-black text-slate-800">
+                    <td className="p-5 text-center">
+                      <span className="text-xl font-black text-gray-800">
                         {item.nilaiAkhir}
                       </span>
                     </td>
                     
                     {/* Status Lulus/Gagal */}
-                    <td className="p-4 text-center">
+                    <td className="p-5 text-center">
                       {item.status === "Lulus" ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
-                          <CheckCircle2 size={12} />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-green-50 text-bta-green border border-bta-green/20">
+                          <CheckCircle2 size={14} />
                           Lulus
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md bg-rose-50 text-rose-700 border border-rose-100">
-                          <XCircle size={12} />
-                          Gagal
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-red-50 text-red-600 border border-red-200">
+                          <XCircle size={14} />
+                          Tidak Lulus
                         </span>
                       )}
                     </td>
 
                     {/* No Sertifikat */}
-                    <td className="p-4">
+                    <td className="p-5">
                       {item.noSertifikat !== "-" ? (
-                        <span className="font-mono text-xs text-slate-600 bg-slate-50 px-2 py-1 border border-slate-200 rounded">
+                        <span className="font-mono text-xs font-bold text-gray-600 bg-gray-50 px-3 py-2 border border-gray-200 rounded-lg inline-block">
                           {item.noSertifikat}
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">Belum terbit</span>
+                        <span className="text-xs text-gray-400 font-bold italic bg-gray-50 px-3 py-2 border border-gray-100 rounded-lg inline-block">Menunggu Terbit</span>
                       )}
                     </td>
                   </tr>
@@ -309,9 +307,12 @@ const PelaporanDanEkspor = () => {
       </div>
       
       {/* Footer Info Data */}
-      <div className="mt-4 flex justify-between items-center text-xs text-slate-500 px-2">
-        <span>Menampilkan {filteredData.length} baris data laporan.</span>
-        <span>Sistem BTA terhubung ke Database Pusat.</span>
+      <div className="mt-4 flex justify-between items-center text-xs font-bold text-gray-400 px-4">
+        <span>Menampilkan {filteredData.length} baris data tervalidasi.</span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-bta-green animate-pulse"></span>
+          Sinkronisasi Database Aktif
+        </span>
       </div>
     </div>
   );
