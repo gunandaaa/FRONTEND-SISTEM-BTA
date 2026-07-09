@@ -62,6 +62,7 @@ function AdminLayout() {
           <NavLink to="/admin/validasi-administrasi" onClick={closeMobileSidebar} className={menuClass}>Validasi Administrasi</NavLink>
           <NavLink to="/admin/tes-penempatan" onClick={closeMobileSidebar} className={menuClass}>Tes Penempatan</NavLink>
           <NavLink to="/admin/manajemen-kelas" onClick={closeMobileSidebar} className={menuClass}>Manajemen Kelas</NavLink>
+          <NavLink to="/admin/manajemen-mahasiswa" onClick={closeMobileSidebar} className={menuClass}>Manajemen Mahasiswa</NavLink>
           <NavLink to="/admin/validasi-nilai" onClick={closeMobileSidebar} className={menuClass}>Validasi Nilai</NavLink>
         </nav>
 

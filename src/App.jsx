@@ -36,6 +36,8 @@ import DashboardRektorat from "./pages/rektorat/Dashboard";
 import LaporanAkademik from "./pages/rektorat/LaporanAkademik";
 import LaporanKeuangan from "./pages/rektorat/LaporanKeuangan";
 
+import ManajemenMahasiswa from "./pages/admin_bta/ManajemenMahasiswa";
+
 function App() {
   return (
     <BrowserRouter>
@@ -68,6 +70,7 @@ function App() {
           <Route path="validasi-administrasi" element={<ValidasiAdministrasi />} />
           <Route path="tes-penempatan" element={<TesPenempatan />} />
           <Route path="manajemen-kelas" element={<ManajemenKelas />} />
+          <Route path="manajemen-mahasiswa" element={<ManajemenMahasiswa />} />
           <Route path="validasi-nilai" element={<ValidasiNilai />} />
         </Route>
 
