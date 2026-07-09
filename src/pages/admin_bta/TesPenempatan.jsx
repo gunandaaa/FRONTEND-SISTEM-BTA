@@ -5,11 +5,11 @@ import {
   FileEdit, 
   CheckCircle2, 
   HelpCircle,
-  AlertCircle
+  AlertCircle,
+  FileCheck
 } from 'lucide-react';
 
 const TesPenempatan = () => {
-  // State data dummy mahasiswa untuk kebutuhan tes penempatan
   const [students, setStudents] = useState([
     {
       id: 1,
@@ -45,19 +45,16 @@ const TesPenempatan = () => {
     }
   ]);
 
-  // State untuk pencarian, filter, dan form input baris yang sedang diedit
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [inputValues, setInputValues] = useState({ makhorijul: "", tajwid: "", sifatul_huruf: "" });
   const [validationError, setValidationError] = useState("");
 
-  // Filter pencarian berdasarkan nama atau NIM
   const filteredStudents = students.filter(student => 
     student.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.nim.includes(searchTerm)
   );
 
-  // Aktifkan mode edit nilai untuk baris mahasiswa tertentu
   const handleEditClick = (student) => {
     setEditingId(student.id);
     setInputValues({
@@ -68,23 +65,19 @@ const TesPenempatan = () => {
     setValidationError("");
   };
 
-  // Handle perubahan nilai di form input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setInputValues({ ...inputValues, [name]: value });
   };
 
-  // Validasi dan Simpan Nilai
   const handleSaveValues = (id) => {
     const { makhorijul, tajwid, sifatul_huruf } = inputValues;
 
-    // Pastikan semua kolom form terisi angka
     if (!makhorijul || !tajwid || !sifatul_huruf) {
       setValidationError("Semua kolom komponen nilai wajib diisi.");
       return;
     }
 
-    // Validasi batas angka minimal 50 dan maksimal 100
     const mVal = parseInt(makhorijul);
     const tVal = parseInt(tajwid);
     const sVal = parseInt(sifatul_huruf);
@@ -94,11 +87,9 @@ const TesPenempatan = () => {
       return;
     }
 
-    // Simulasi logika sederhana backend untuk menentukan tingkat MQ otomatis berdasarkan rata-rata
     const average = (mVal + tVal + sVal) / 3;
     const penempatanOtomatis = average >= 75 ? "MQ 2" : "MQ 1";
 
-    // Update state utama
     setStudents(students.map(student => {
       if (student.id === id) {
         return {
@@ -110,65 +101,78 @@ const TesPenempatan = () => {
       return student;
     }));
 
-    // Reset keadaan editing
     setEditingId(null);
     setValidationError("");
     alert(`Data nilai berhasil disimpan ke sistem! Berdasarkan nilai rata-rata (${average.toFixed(1)}), mahasiswa dialokasikan ke ${penempatanOtomatis}.`);
   };
 
+  // ==========================================
+  // TAMPILAN UI/UX BTA (DIPERBARUI)
+  // ==========================================
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
-      {/* Header Halaman */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Tes Penempatan (Input Nilai Luring)</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Salin dan digitalisasikan data nilai hasil pengujian kertas lembar luring para Ustadz ke dalam sistem aplikasi BTA.
-        </p>
+    <div className="space-y-8 animate-fade-in-up font-sans">
+      
+      {/* HEADER HALAMAN */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-bta-green tracking-tight flex items-center gap-3">
+            <div className="bg-bta-green/10 p-2.5 rounded-xl text-bta-green">
+              <FileCheck size={24} />
+            </div>
+            Tes Penempatan (Input Nilai Luring)
+          </h1>
+          <p className="text-gray-500 mt-2 font-medium">
+            Salin dan digitalisasikan data nilai hasil pengujian kertas lembar luring para Ustadz ke dalam sistem aplikasi BTA.
+          </p>
+        </div>
       </div>
 
-      {/* Toolbar Pencarian Utama */}
-      <div className="mb-6">
-        <div className="relative w-full md:w-96">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+      {/* TOOLBAR PENCARIAN UTAMA */}
+      <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-md">
+        <div className="relative w-full">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
             <Search size={18} />
           </span>
           <input 
             type="text"
-            placeholder="Ketik NIM atau Nama Mahasiswa untuk mencari cepat..."
+            placeholder="Ketik NIM atau Nama Mahasiswa untuk mencari..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-700 placeholder-slate-400 shadow-sm"
+            className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-700 placeholder-gray-400 transition-all"
           />
         </div>
       </div>
 
-      {/* Alert Error Validasi */}
+      {/* ALERT ERROR VALIDASI (ANIMASI INDAH) */}
       {validationError && (
-        <div className="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl flex items-center gap-2 text-sm font-medium animate-shake">
-          <AlertCircle size={18} className="shrink-0" />
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center gap-3 text-sm font-bold shadow-sm animate-in fade-in slide-in-from-top-2">
+          <AlertCircle size={20} className="shrink-0 text-red-600" />
           <span>{validationError}</span>
         </div>
       )}
 
-      {/* Tabel Utama Input Nilai */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      {/* TABEL UTAMA INPUT DATA */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="bg-slate-900 text-white text-sm font-semibold">
-                <th className="p-4 rounded-tl-2xl">Mahasiswa</th>
-                <th className="p-4 text-center w-28">Makhorijul Huruf</th>
-                <th className="p-4 text-center w-28">Tajwid</th>
-                <th className="p-4 text-center w-28">Sifatul Huruf</th>
-                <th className="p-4 text-center w-36">Status Hasil</th>
-                <th className="p-4 text-center rounded-tr-2xl w-44">Aksi Operasional</th>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="p-5 text-xs font-black text-bta-green uppercase tracking-wider">Data Mahasiswa</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider w-36">Makhorijul Huruf</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider w-36">Tajwid</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider w-36">Sifatul Huruf</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider w-40">Status Alokasi</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider w-48">Tindakan Nilai</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+            <tbody className="divide-y divide-gray-50 text-sm text-gray-700 font-medium">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-slate-400 font-medium">
-                    Mahasiswa yang Anda cari tidak ditemukan.
+                  <td colSpan="6" className="p-12 text-center text-gray-400 font-medium">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Search size={32} className="text-gray-300" />
+                      <p>Mahasiswa yang Anda cari tidak ditemukan.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -176,16 +180,19 @@ const TesPenempatan = () => {
                   const isEditing = editingId === student.id;
                   
                   return (
-                    <tr key={student.id} className="hover:bg-slate-50/60 transition-colors duration-150">
+                    <tr key={student.id} className="hover:bg-gray-50/50 transition-colors duration-150">
+                      
                       {/* Kolom Profil Mahasiswa */}
-                      <td className="p-4">
-                        <div className="font-bold text-slate-800">{student.nama}</div>
-                        <div className="text-xs text-slate-400 font-mono mt-0.5">{student.nim}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">{student.prodi}</div>
+                      <td className="p-5">
+                        <div className="font-bold text-gray-800">{student.nama}</div>
+                        <div className="text-xs text-gray-400 font-mono mt-1">{student.nim}</div>
+                        <div className="text-xs text-bta-green font-bold bg-green-50 border border-bta-green/10 px-2 py-0.5 rounded mt-2 inline-block">
+                          {student.prodi}
+                        </div>
                       </td>
                       
                       {/* Form Input / Output: Makhorijul Huruf */}
-                      <td className="p-4 text-center">
+                      <td className="p-5 text-center">
                         {isEditing ? (
                           <input 
                             type="number"
@@ -194,18 +201,18 @@ const TesPenempatan = () => {
                             max="100"
                             value={inputValues.makhorijul}
                             onChange={handleInputChange}
-                            className="w-20 text-center py-1.5 border border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:border-emerald-500 text-slate-800 shadow-inner"
+                            className="w-24 text-center py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
                             placeholder="50-100"
                           />
                         ) : (
-                          <span className={`font-mono font-bold ${student.nilai.makhorijul ? 'text-slate-800' : 'text-slate-300'}`}>
+                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg ${student.nilai.makhorijul ? 'text-gray-800 bg-gray-50 border border-gray-100' : 'text-gray-300'}`}>
                             {student.nilai.makhorijul || "—"}
                           </span>
                         )}
                       </td>
 
                       {/* Form Input / Output: Tajwid */}
-                      <td className="p-4 text-center">
+                      <td className="p-5 text-center">
                         {isEditing ? (
                           <input 
                             type="number"
@@ -214,18 +221,18 @@ const TesPenempatan = () => {
                             max="100"
                             value={inputValues.tajwid}
                             onChange={handleInputChange}
-                            className="w-20 text-center py-1.5 border border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:border-emerald-500 text-slate-800 shadow-inner"
+                            className="w-24 text-center py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
                             placeholder="50-100"
                           />
                         ) : (
-                          <span className={`font-mono font-bold ${student.nilai.tajwid ? 'text-slate-800' : 'text-slate-300'}`}>
+                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg ${student.nilai.tajwid ? 'text-gray-800 bg-gray-50 border border-gray-100' : 'text-gray-300'}`}>
                             {student.nilai.tajwid || "—"}
                           </span>
                         )}
                       </td>
 
                       {/* Form Input / Output: Sifatul Huruf */}
-                      <td className="p-4 text-center">
+                      <td className="p-5 text-center">
                         {isEditing ? (
                           <input 
                             type="number"
@@ -234,52 +241,52 @@ const TesPenempatan = () => {
                             max="100"
                             value={inputValues.sifatul_huruf}
                             onChange={handleInputChange}
-                            className="w-20 text-center py-1.5 border border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:border-emerald-500 text-slate-800 shadow-inner"
+                            className="w-24 text-center py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
                             placeholder="50-100"
                           />
                         ) : (
-                          <span className={`font-mono font-bold ${student.nilai.sifatul_huruf ? 'text-slate-800' : 'text-slate-300'}`}>
+                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg ${student.nilai.sifatul_huruf ? 'text-gray-800 bg-gray-50 border border-gray-100' : 'text-gray-300'}`}>
                             {student.nilai.sifatul_huruf || "—"}
                           </span>
                         )}
                       </td>
 
-                      {/* Status Penempatan */}
-                      <td className="p-4 text-center">
+                      {/* Status Penempatan Badges */}
+                      <td className="p-5 text-center">
                         {student.status === "Belum Dites" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-gray-50 text-gray-500 border border-gray-200">
                             <HelpCircle size={12} />
                             Belum Dites
                           </span>
                         )}
                         {student.status === "MQ 1" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-100">
-                            <CheckCircle2 size={12} className="text-amber-500" />
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-bta-yellow/20 text-yellow-700 border border-bta-yellow/40">
+                            <CheckCircle2 size={12} />
                             Tingkat MQ 1
                           </span>
                         )}
                         {student.status === "MQ 2" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                            <CheckCircle2 size={12} className="text-emerald-500" />
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-green-50 text-bta-green border border-bta-green/20">
+                            <CheckCircle2 size={12} />
                             Tingkat MQ 2
                           </span>
                         )}
                       </td>
 
-                      {/* Tombol Kontrol Aksi */}
-                      <td className="p-4 text-center">
+                      {/* Tombol Aksi Operasional Form */}
+                      <td className="p-5 text-center">
                         {isEditing ? (
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={() => handleSaveValues(student.id)}
-                              className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-1.5 px-3 rounded-lg shadow-sm transition-colors"
+                              className="flex items-center justify-center gap-1.5 bg-bta-green hover:bg-green-900 text-white font-black text-xs py-2 px-3 rounded-xl shadow-md transition-all hover:-translate-y-0.5"
                             >
                               <Save size={14} />
                               <span>Simpan</span>
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 font-semibold text-xs py-1.5 px-2.5 rounded-lg transition-colors"
+                              className="bg-white hover:bg-gray-100 text-gray-500 border border-gray-200 font-bold text-xs py-2 px-3 rounded-xl transition-colors"
                             >
                               Batal
                             </button>
@@ -287,7 +294,7 @@ const TesPenempatan = () => {
                         ) : (
                           <button
                             onClick={() => handleEditClick(student)}
-                            className="inline-flex items-center gap-1 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-xs py-1.5 px-4 rounded-lg shadow-sm transition-all"
+                            className="inline-flex items-center justify-center gap-1.5 bg-white hover:bg-green-50 text-bta-green border border-bta-green/20 font-black text-xs py-2 px-4 rounded-xl shadow-sm hover:shadow transition-all"
                           >
                             <FileEdit size={14} />
                             <span>{student.status === "Belum Dites" ? "Input Nilai" : "Edit Nilai"}</span>
