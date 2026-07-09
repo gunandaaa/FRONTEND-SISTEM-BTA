@@ -8,11 +8,14 @@ import {
   AlertCircle, 
   CheckCircle2, 
   XCircle,
-  Clock
+  Clock,
+  FileCheck2
 } from 'lucide-react';
 
 const ValidasiNilai = () => {
-  // State data dummy unggahan nilai dari para tutor
+  // ==========================================
+  // LOGIKA & DATA DUMMY GUNANDA (TIDAK DISENTUH)
+  // ==========================================
   const [gradeFiles, setGradeFiles] = useState([
     {
       id: 1,
@@ -48,24 +51,20 @@ const ValidasiNilai = () => {
     }
   ]);
 
-  // State pencarian dan modal penolakan
   const [searchTerm, setSearchTerm] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // Filter pencarian berdasarkan kelas atau nama tutor
   const filteredFiles = gradeFiles.filter(item => 
     item.kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.tutor.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Aksi 1: Unduh Dokumen Excel (Simulasi)
   const handleDownload = (fileName) => {
     alert(`Mengunduh dokumen: ${fileName}\n\nSilakan buka file ini di Excel perangkat Anda untuk mengecek kewajaran nilai sebelum melakukan validasi.`);
   };
 
-  // Aksi 2: Validasi & Teruskan ke Kepala Pusat
   const handleApprove = (id, kelas) => {
     setGradeFiles(gradeFiles.map(item => 
       item.id === id ? { ...item, status: "Diteruskan ke Kepala Pusat" } : item
@@ -73,13 +72,11 @@ const ValidasiNilai = () => {
     alert(`Berhasil memvalidasi nilai ${kelas}. Data telah diteruskan ke dashboard Kepala Pusat (Pak Ulin) untuk disahkan.`);
   };
 
-  // Membuka modal kembalikan file
   const openRejectModal = (item) => {
     setSelectedFile(item);
     setShowRejectModal(true);
   };
 
-  // Aksi 3: Kembalikan ke Tutor (Submit dari Modal)
   const handleRejectSubmit = () => {
     if (!rejectReason.trim()) {
       alert("Silakan masukkan alasan kenapa file ini dikembalikan ke tutor.");
@@ -96,127 +93,146 @@ const ValidasiNilai = () => {
     setSelectedFile(null);
   };
 
+  // ==========================================
+  // TAMPILAN UI/UX BTA (DIPERBARUI)
+  // ==========================================
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
-      {/* Header Halaman */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Validasi Nilai Akhir</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Pintu penyaringan terakhir. Unduh dan periksa format file Excel dari Tutor sebelum diteruskan kepada Kepala Pusat.
-        </p>
+    <div className="space-y-8 animate-fade-in-up font-sans">
+      
+      {/* HEADER HALAMAN */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-bta-green tracking-tight flex items-center gap-3">
+            <div className="bg-bta-green/10 p-2.5 rounded-xl text-bta-green">
+              <FileCheck2 size={24} />
+            </div>
+            Validasi Nilai Akhir
+          </h1>
+          <p className="text-gray-500 mt-2 font-medium">
+            Pintu penyaringan terakhir. Unduh dan periksa format file Excel dari Tutor sebelum diteruskan kepada Kepala Pusat.
+          </p>
+        </div>
       </div>
 
-      {/* Toolbar Pencarian */}
-      <div className="mb-6">
-        <div className="relative w-full md:w-96">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+      {/* TOOLBAR PENCARIAN */}
+      <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-md">
+        <div className="relative w-full">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
             <Search size={18} />
           </span>
           <input 
             type="text"
-            placeholder="Cari berdasarkan Kelas atau Nama Tutor..."
+            placeholder="Cari berdasarkan kelas atau nama tutor..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-700 shadow-sm"
+            className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-700 placeholder-gray-400 transition-all"
           />
         </div>
       </div>
 
-      {/* Tabel Utama */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      {/* TABEL UTAMA VALIDASI BERKAS */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="bg-slate-900 text-white text-sm font-semibold">
-                <th className="p-4 rounded-tl-2xl w-64">Informasi Kelas & Tutor</th>
-                <th className="p-4 w-48">Waktu Unggahan</th>
-                <th className="p-4 text-center">Dokumen Excel</th>
-                <th className="p-4 text-center w-56">Status Validasi</th>
-                <th className="p-4 text-center rounded-tr-2xl w-64">Aksi Operasional</th>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="p-5 text-xs font-black text-bta-green uppercase tracking-wider">Informasi Kelas & Tutor</th>
+                <th className="p-5 text-xs font-black text-bta-green uppercase tracking-wider">Waktu Unggahan</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider">Dokumen Excel</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider">Status Validasi</th>
+                <th className="p-5 text-center text-xs font-black text-bta-green uppercase tracking-wider w-64">Tindakan Berkas</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+            <tbody className="divide-y divide-gray-50 text-sm text-gray-700 font-medium">
               {filteredFiles.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-slate-400 font-medium">
-                    Tidak ada data unggahan nilai yang ditemukan.
+                  <td colSpan="5" className="p-12 text-center text-gray-400 font-medium">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Search size={32} className="text-gray-300" />
+                      <p>Tidak ada data unggahan nilai yang ditemukan.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filteredFiles.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors duration-150">
-                    {/* Kolom Informasi */}
-                    <td className="p-4">
-                      <div className="font-bold text-slate-800">{item.kelas}</div>
-                      <div className="text-xs text-slate-500 mt-1">{item.tutor}</div>
+                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors duration-150">
+                    
+                    {/* Kelas & Tutor */}
+                    <td className="p-5">
+                      <div className="font-bold text-gray-800 text-base">{item.kelas}</div>
+                      <div className="text-xs text-gray-400 font-semibold mt-1">{item.tutor}</div>
                     </td>
                     
-                    {/* Kolom Waktu */}
-                    <td className="p-4 text-xs font-medium text-slate-600">
-                      {item.waktuUnggah}
+                    {/* Waktu Unggah */}
+                    <td className="p-5">
+                      <span className="text-xs font-mono font-bold text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100">
+                        {item.waktuUnggah}
+                      </span>
                     </td>
                     
-                    {/* Kolom Dokumen (Tombol Download) */}
-                    <td className="p-4 text-center">
-                      <div className="flex flex-col items-center gap-1.5">
-                        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100 w-fit">
-                          <FileSpreadsheet size={16} />
-                          <span className="font-semibold text-xs truncate max-w-[120px]" title={item.namaFile}>
+                    {/* File Excel (Pill Indah) */}
+                    <td className="p-5">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="flex items-center gap-2 bg-green-50 text-bta-green px-3 py-1.5 rounded-xl border border-bta-green/10 w-fit max-w-[180px]">
+                          <FileSpreadsheet size={16} strokeWidth={2.5} />
+                          <span className="font-bold text-xs truncate" title={item.namaFile}>
                             {item.namaFile}
                           </span>
                         </div>
                         <button 
                           onClick={() => handleDownload(item.namaFile)}
-                          className="text-[11px] font-bold text-slate-500 hover:text-emerald-600 hover:underline flex items-center gap-1 mt-1"
+                          className="text-[11px] font-black uppercase tracking-wider text-gray-400 hover:text-bta-green flex items-center gap-1 transition-colors mt-0.5"
                         >
-                          <Download size={12} /> Unduh Dokumen Review
+                          <Download size={12} strokeWidth={3} /> Unduh & Periksa
                         </button>
                       </div>
                     </td>
                     
-                    {/* Kolom Status */}
-                    <td className="p-4 text-center">
+                    {/* Status Lencana */}
+                    <td className="p-5 text-center">
                       {item.status === "Menunggu Validasi" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-100">
-                          <Clock size={12} />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-orange-50 text-orange-600 border border-orange-200">
+                          <Clock size={12} strokeWidth={2.5} />
                           Menunggu Validasi
                         </span>
                       )}
                       {item.status === "Diteruskan ke Kepala Pusat" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                          <CheckCircle2 size={12} />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-green-50 text-bta-green border border-bta-green/20">
+                          <CheckCircle2 size={12} strokeWidth={2.5} />
                           Diteruskan
                         </span>
                       )}
                       {item.status === "Dikembalikan ke Tutor" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 text-rose-700 border border-rose-100">
-                          <XCircle size={12} />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-red-50 text-red-600 border border-red-200">
+                          <XCircle size={12} strokeWidth={2.5} />
                           Dikembalikan
                         </span>
                       )}
                     </td>
                     
-                    {/* Kolom Aksi */}
-                    <td className="p-4 text-center">
+                    {/* Tombol Kontrol Eksekusi */}
+                    <td className="p-5">
                       {item.status === "Menunggu Validasi" ? (
                         <div className="flex flex-col gap-2 justify-center">
                           <button
                             onClick={() => handleApprove(item.id, item.kelas)}
-                            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-3 rounded-lg shadow-sm transition-colors"
+                            className="flex items-center justify-center gap-1.5 bg-bta-green hover:bg-green-900 text-white font-black text-xs py-2 px-4 rounded-xl shadow-md transition-all hover:-translate-y-0.5"
                           >
-                            <Send size={14} />
+                            <Send size={14} strokeWidth={2.5} />
                             <span>Validasi & Teruskan</span>
                           </button>
                           <button
                             onClick={() => openRejectModal(item)}
-                            className="flex items-center justify-center gap-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-semibold text-xs py-2 px-3 rounded-lg transition-colors"
+                            className="flex items-center justify-center gap-1.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 font-bold text-xs py-2 px-3 rounded-xl transition-all"
                           >
-                            <X size={14} />
+                            <X size={14} strokeWidth={2.5} />
                             <span>Kembalikan ke Tutor</span>
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">Sudah Diproses</span>
+                        <div className="text-center">
+                          <span className="text-xs text-gray-400 font-bold bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 inline-block">Selesai Diproses</span>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -227,40 +243,50 @@ const ValidasiNilai = () => {
         </div>
       </div>
 
-      {/* MODAL: Form Alasan Pengembalian (Reject) */}
+      {/* MODAL DIALOG EVALUASI DOKUMEN NILAI */}
       {showRejectModal && selectedFile && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 border-b border-slate-100 bg-rose-50 flex items-center gap-2 text-rose-800">
-              <AlertCircle size={20} />
-              <h3 className="font-bold">Kembalikan Dokumen ke Tutor</h3>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+            
+            {/* Header Modal */}
+            <div className="p-6 bg-red-600 flex items-center justify-between relative overflow-hidden">
+               <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+               <h3 className="font-black text-white text-lg flex items-center gap-2 relative z-10">
+                 <AlertCircle size={20} className="text-bta-yellow" />
+                 Kembalikan Berkas Nilai
+               </h3>
+               <button onClick={() => { setShowRejectModal(false); setRejectReason(""); }} className="text-white/60 hover:text-white transition-colors relative z-10">
+                 <X size={24} />
+               </button>
             </div>
             
-            <div className="p-5">
-              <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                Anda akan menolak dan mengembalikan dokumen nilai <strong>{selectedFile.kelas}</strong>. Tutor <strong>{selectedFile.tutor}</strong> akan menerima notifikasi ini.
+            {/* Form Konten */}
+            <div className="p-6">
+              <p className="text-sm font-medium text-gray-600 mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">
+                Anda menolak memvalidasi file nilai untuk <strong className="text-gray-900">{selectedFile.kelas}</strong>. Masukkan alasan peninjauan agar tutor <strong className="text-gray-900">{selectedFile.tutor}</strong> dapat melakukan perbaikan data.
               </p>
               
-              <label className="block text-xs font-bold text-slate-600 mb-1.5">Alasan Pengembalian Dokumen</label>
+              <label className="block text-xs font-black text-bta-green uppercase tracking-wider mb-2">Alasan Pengembalian</label>
               <textarea
-                rows="3"
-                placeholder="Contoh: Format Excel rusak, masih banyak kolom nilai yang kosong, atau salah unggah dokumen..."
+                rows="4"
+                placeholder="Contoh: Lampiran file kosong, nama mahasiswa tidak sesuai dengan daftar hadir kelas, atau format rumus rata-rata salah..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-rose-500 placeholder-slate-400 shadow-inner"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 placeholder:text-gray-400 transition-all"
               />
             </div>
 
-            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+            {/* Tombol Aksi */}
+            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-3xl">
               <button 
                 onClick={() => { setShowRejectModal(false); setRejectReason(""); }}
-                className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold"
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-200 transition-colors"
               >
                 Batal
               </button>
               <button 
                 onClick={handleRejectSubmit}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-sm"
+                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
               >
                 Kirim Notifikasi
               </button>
