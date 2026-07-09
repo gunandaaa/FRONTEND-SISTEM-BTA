@@ -24,9 +24,6 @@ import {
 
 // NAMA KOMPONEN DIUBAH MENJADI DashboardRektorat
 const DashboardRektorat = () => {
-  // ==========================================
-  // LOGIKA & DATA DUMMY GUNANDA (TIDAK DISENTUH)
-  // ==========================================
   const navigate = useNavigate();
   const [selectedSemester, setSelectedSemester] = useState("Ganjil 2025/2026");
 
