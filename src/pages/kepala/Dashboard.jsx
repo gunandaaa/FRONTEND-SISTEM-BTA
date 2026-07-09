@@ -26,15 +26,13 @@ const DashboardKepala = () => {
   const navigate = useNavigate();
   const [selectedSemester, setSelectedSemester] = useState("Ganjil 2025/2026");
 
-  // Data Dummy Finansial & Metrik Utama
   const summaryData = {
     totalMahasiswa: 450,
     totalLulus: 385,
-    pemasukan: 45000000, // 450 mahasiswa * Rp100.000
+    pemasukan: 45000000, 
     persentaseLulus: 85.5
   };
 
-  // Data Dummy Grafik Kelulusan per Fakultas
   const dataKelulusan = [
     { name: 'FIP', Lulus: 120, Mengulang: 15 },
     { name: 'FTI', Lulus: 95, Mengulang: 20 },
@@ -42,16 +40,14 @@ const DashboardKepala = () => {
     { name: 'FEB', Lulus: 40, Mengulang: 20 },
   ];
 
-  // Data Dummy Grafik Perbandingan Penempatan MQ
   const dataMQ = [
     { name: 'Tingkat MQ 1', value: 250 },
     { name: 'Tingkat MQ 2', value: 200 },
   ];
   
-  // Palet Warna untuk Pie Chart
-  const COLORS = ['#f59e0b', '#10b981']; // Amber untuk MQ 1, Emerald untuk MQ 2
+  // Mengkalibrasi warna grafik agar sesuai palet BTA
+  const COLORS = ['#FAEA29', '#074526']; 
 
-  // Format angka ke Rupiah
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -60,116 +56,145 @@ const DashboardKepala = () => {
     }).format(number);
   };
 
+  // ==========================================
+  // TAMPILAN UI/UX BTA (DIPERBARUI)
+  // ==========================================
   return (
-    <div className="bg-slate-50 min-h-screen">
-      {/* Header Eksekutif & Filter */}
-      <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-800">Dashboard Eksekutif</h1>
-          <p className="text-slate-500 mt-2">Ringkasan performa akademik dan finansial Program BTA Universitas Nurul Huda.</p>
+    <div className="space-y-8 animate-fade-in-up font-sans">
+      
+      {/* BANNER EKSEKUTIF & FILTER */}
+      <div className="bg-bta-green rounded-[2rem] p-8 md:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6 relative overflow-hidden border-b-8 border-bta-yellow shadow-xl">
+        
+        {/* Dekorasi Latar Banner */}
+        <div className="absolute top-[-50%] right-[-10%] w-80 h-80 bg-bta-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10">
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">Dashboard Eksekutif</h1>
+          <p className="text-white/80 mt-3 max-w-lg font-medium leading-relaxed">
+            Ringkasan komprehensif performa akademik dan finansial Program BTA Universitas Nurul Huda.
+          </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          {/* Dropdown Filter Rentang Waktu */}
-          <div className="relative w-full sm:w-auto">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Calendar size={16} className="text-slate-400" />
+        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+          {/* Dropdown Filter Rentang Waktu (Kustom Styling Transparan) */}
+          <div className="relative w-full sm:w-auto group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Calendar size={18} className="text-bta-yellow" />
             </div>
             <select 
               value={selectedSemester}
               onChange={(e) => setSelectedSemester(e.target.value)}
-              className="w-full sm:w-56 pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-emerald-500 shadow-sm appearance-none cursor-pointer"
+              className="w-full sm:w-60 pl-12 pr-10 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-bta-yellow focus:ring-1 focus:ring-bta-yellow shadow-sm appearance-none cursor-pointer transition-all hover:bg-white/20"
             >
-              <option value="Genap 2024/2025">Genap 2024/2025</option>
-              <option value="Ganjil 2025/2026">Ganjil 2025/2026</option>
-              <option value="Genap 2025/2026">Genap 2025/2026</option>
+              <option value="Genap 2024/2025" className="text-gray-800">Genap 2024/2025</option>
+              <option value="Ganjil 2025/2026" className="text-gray-800">Ganjil 2025/2026</option>
+              <option value="Genap 2025/2026" className="text-gray-800">Genap 2025/2026</option>
             </select>
+            {/* Custom Arrow for Select */}
+            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
           </div>
           
-          {/* Tombol Pintasan */}
+          {/* Tombol Pintasan Laporan */}
           <button 
             onClick={() => navigate('/kepala/pelaporan')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-emerald-700 text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-sm transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-bta-yellow hover:bg-yellow-400 text-bta-black font-black text-sm py-3.5 px-6 rounded-xl shadow-[0_4px_14px_0_rgba(250,234,41,0.39)] hover:shadow-[0_6px_20px_rgba(250,234,41,0.23)] hover:-translate-y-0.5 transition-all duration-300"
           >
-            <span>Lihat Laporan Lengkap</span>
-            <ArrowRight size={16} />
+            <span>Lihat Laporan Detail</span>
+            <ArrowRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* Kartu Ringkasan (Key Metrics) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* KARTU RINGKASAN (KEY METRICS) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
         {/* Kartu Finansial */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <Wallet size={28} />
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-bta-green">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3.5 bg-bta-green/10 text-bta-green rounded-2xl">
+              <Wallet size={24} strokeWidth={2.5} />
+            </div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Finansial</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-500 mb-1">Pemasukan Administrasi</p>
-            <h3 className="text-2xl font-black text-slate-800">{formatRupiah(summaryData.pemasukan)}</h3>
-            <p className="text-xs text-slate-400 mt-1">Dari total {summaryData.totalMahasiswa} pendaftar baru</p>
+            <h3 className="text-3xl md:text-4xl font-black text-bta-black tracking-tight">{formatRupiah(summaryData.pemasukan)}</h3>
+            <p className="text-sm text-gray-500 font-medium mt-2">Dari total <strong className="text-bta-green">{summaryData.totalMahasiswa}</strong> pendaftar administrasi</p>
           </div>
         </div>
 
         {/* Kartu Persentase Kelulusan */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-            <TrendingUp size={28} />
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-bta-yellow">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3.5 bg-bta-yellow/20 text-yellow-600 rounded-2xl">
+              <TrendingUp size={24} strokeWidth={2.5} />
+            </div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Akademik</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-500 mb-1">Rasio Kelulusan Global</p>
-            <h3 className="text-2xl font-black text-slate-800">{summaryData.persentaseLulus}%</h3>
-            <p className="text-xs text-slate-400 mt-1">{summaryData.totalLulus} Mahasiswa dinyatakan lulus</p>
+            <h3 className="text-3xl md:text-4xl font-black text-bta-black tracking-tight">{summaryData.persentaseLulus}%</h3>
+            <p className="text-sm text-gray-500 font-medium mt-2"><strong className="text-yellow-600">{summaryData.totalLulus}</strong> Mahasiswa dinyatakan lulus global</p>
           </div>
         </div>
 
         {/* Kartu Total Mahasiswa Aktif */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Users size={28} />
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-gray-800">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3.5 bg-gray-100 text-gray-700 rounded-2xl">
+              <Users size={24} strokeWidth={2.5} />
+            </div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Populasi</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-500 mb-1">Total Mahasiswa Aktif</p>
-            <h3 className="text-2xl font-black text-slate-800">{summaryData.totalMahasiswa}</h3>
-            <p className="text-xs text-slate-400 mt-1">Terbagi dalam tingkat MQ 1 & MQ 2</p>
+            <h3 className="text-3xl md:text-4xl font-black text-bta-black tracking-tight">{summaryData.totalMahasiswa}</h3>
+            <p className="text-sm text-gray-500 font-medium mt-2">Terbagi dalam klaster <strong className="text-gray-800">MQ 1 & MQ 2</strong></p>
           </div>
         </div>
       </div>
 
-      {/* Area Visualisasi Data (Grafik) */}
+      {/* AREA VISUALISASI DATA (GRAFIK RECHARTS) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
         {/* Grafik 1: Bar Chart Kelulusan per Fakultas */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
-            <GraduationCap className="text-slate-400" size={20} />
-            <h3 className="text-lg font-bold text-slate-800">Tingkat Kelulusan per Fakultas</h3>
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-bta-green/10 p-2 rounded-lg text-bta-green">
+              <GraduationCap size={20} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-black text-bta-green">Tingkat Kelulusan per Fakultas</h3>
           </div>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={dataKelulusan}
-                margin={{ top: 5, right: 30, left: -20, bottom: 5 }}
+                margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 13, fontWeight: 600}} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                 <Tooltip 
                   cursor={{fill: '#f8fafc'}}
-                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
+                  contentStyle={{borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: 'bold'}}
                 />
-                <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '10px'}} />
-                <Bar dataKey="Lulus" fill="#10b981" radius={[4, 4, 0, 0]} barSize={32} />
-                <Bar dataKey="Mengulang" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={32} />
+                <Legend iconType="circle" wrapperStyle={{fontSize: '13px', fontWeight: 600, paddingTop: '20px'}} />
+                {/* Lulus menggunakan warna Hijau BTA */}
+                <Bar dataKey="Lulus" fill="#074526" radius={[6, 6, 0, 0]} barSize={28} />
+                {/* Mengulang menggunakan warna Merah elegan UX */}
+                <Bar dataKey="Mengulang" fill="#ef4444" radius={[6, 6, 0, 0]} barSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Grafik 2: Pie Chart Rasio Penempatan MQ */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
-            <Users className="text-slate-400" size={20} />
-            <h3 className="text-lg font-bold text-slate-800">Distribusi Penempatan Kelas MQ</h3>
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-bta-yellow/20 p-2 rounded-lg text-yellow-600">
+              <Users size={20} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-black text-bta-green">Distribusi Penempatan Kelas MQ</h3>
           </div>
           <div className="h-80 w-full flex flex-col justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -178,25 +203,27 @@ const DashboardKepala = () => {
                   data={dataMQ}
                   cx="50%"
                   cy="50%"
-                  innerRadius={80}
-                  outerRadius={110}
+                  innerRadius={85}
+                  outerRadius={120}
                   paddingAngle={5}
                   dataKey="value"
                   label={({name, percent}) => `${name} (${(percent * 100).toFixed(0)}%)`}
                   labelLine={false}
+                  stroke="none"
                 >
                   {dataMQ.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
+                  contentStyle={{borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: 'bold'}}
                 />
-                <Legend iconType="circle" wrapperStyle={{fontSize: '12px'}} />
+                <Legend iconType="circle" wrapperStyle={{fontSize: '13px', fontWeight: 600, paddingTop: '20px'}} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
+
       </div>
     </div>
   );
