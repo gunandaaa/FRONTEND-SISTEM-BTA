@@ -13,9 +13,6 @@ import {
 } from 'lucide-react';
 
 const ValidasiAdministrasi = () => {
-  // ==========================================
-  // LOGIKA & DATA DUMMY GUNANDA (TIDAK DISENTUH)
-  // ==========================================
   const [students, setStudents] = useState([
     {
       id: 1,
