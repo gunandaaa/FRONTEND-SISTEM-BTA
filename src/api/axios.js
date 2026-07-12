@@ -1,46 +1,25 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8000';
-
+// Menggunakan variabel dari .env
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: import.meta.env.VITE_API_URL, 
   withCredentials: true, 
+  withXSRFToken: true,   
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
 });
 
-// ==========================================
-// INTERCEPTOR REQUEST: MENYISIPKAN TOKEN
-// ==========================================
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // Ambil token dari kantong penyimpanan browser
-    const token = localStorage.getItem('auth_token');
-    
-    // Jika token ada, selipkan ke dalam Header Authorization
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// ==========================================
-// INTERCEPTOR RESPONSE: MENANGANI ERROR 401
-// ==========================================
+// INTERCEPTOR RESPONSE: Menangani error global
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Jika backend merespons 401 (Unauthenticated/Token Kadaluarsa)
+    // Jika backend merespons 401 (Unauthenticated)
     if (error.response && error.response.status === 401) {
-      // Hapus token yang sudah tidak valid
-      localStorage.removeItem('auth_token');
-      // Otomatis tendang user kembali ke halaman login
+      // Hapus data user di local storage jika ada
+      localStorage.removeItem('user'); 
+      // Redirect ke halaman login
       window.location.href = '/login'; 
     }
     return Promise.reject(error);
