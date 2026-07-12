@@ -35,19 +35,17 @@ const Login = () => {
     setErrorMessage("");
 
     try {
+      // 1. Dapatkan CSRF Cookie (Wajib sebelum melakukan POST ke login)
       await axiosInstance.get("/sanctum/csrf-cookie");
 
+      // 2. Kirim data login 
+      // CATATAN: Jika baseURL di axios.js sudah benar, gunakan '/login' saja
+      // Jika masih ada masalah 404, coba '/api/login'
       const response = await axiosInstance.post("/api/login", credentials);
       
-      // Simpan token ke localStorage
-      if (response.data.token) {
-        localStorage.setItem('auth_token', response.data.token);
-      }
-
-      // Ambil role dan ubah ke huruf kecil semua tanpa spasi ekstra
+      // 3. Logika Role
       const userRole = response.data.user.role.toLowerCase().trim();
 
-      // Cek menggunakan huruf kecil semua karena sudah di-toLowerCase()
       if (userRole === "mahasiswa") {
         navigate("/mahasiswa/dashboard");
       } else if (userRole === "tutor") {
@@ -62,8 +60,14 @@ const Login = () => {
         setErrorMessage("Role akun tidak dikenali sistem.");
       }
     } catch (error) {
-      if (error.response && error.response.status === 422) {
-        setErrorMessage("Email atau password tidak sesuai.");
+      // 4. Penanganan Error yang Lebih Spesifik
+      if (error.response) {
+        if (error.response.status === 422 || error.response.status === 401) {
+          // Laravel secara default memberikan status 422/401 saat kredensial salah
+          setErrorMessage("Username atau password salah.");
+        } else {
+          setErrorMessage("Terjadi kesalahan pada server. Silakan coba lagi.");
+        }
       } else {
         setErrorMessage("Gagal terhubung ke server backend.");
       }
