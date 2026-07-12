@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Menggunakan variabel dari .env
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, 
+  baseURL: (import.meta.env.VITE_API_URL || '').replace(/\/+$/, ''), 
   withCredentials: true, 
   withXSRFToken: true,   
   headers: {
