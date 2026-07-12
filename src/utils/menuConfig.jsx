@@ -1,11 +1,32 @@
 export const roleMenus = {
   admin: [
     { label: "Dashboard", path: "/admin/dashboard" },
-    { label: "Manajemen Kelas", path: "/admin/manajemen-kelas" },
-    { label: "Manajemen Mahasiswa", path: "/admin/manajeme-mahasiswa" },
-    { label: "Nilai Tes", path: "/admin/tes-penempatan" },
-    { label: "Validasi Admin", path: "/admin/validasi-admin" },
-    { label: "Validasi Nilai", path: "/admin/validasi-nilai" },
+    {
+        label: "Manajemen Data",
+        type: "group",
+        items: [
+            { label: "Data Tutor", path: "/admin/manajemen-tutor"},
+            { label: "Data Mahasiswa", path: "/admin/manajemen-mahasiswa"},
+            { label: "Periode Akademik", path: "/admin/periode"},
+        ]   
+    },
+    {
+        label: "Manajemen Akademik",
+        type: "group",
+        items: [
+            { label: "Kelola Kelas", path: "/admin/manajemen-kelas"},
+            { label: "Nilai Tes", path: "/admin/tes-penempatan"},
+            { label: "Validasi Slip Pembayaran", path: "/admin/validasi-slip-pembayaran"},
+        ]   
+    },
+    {
+        label: "Pelaporan",
+        type: "group",
+        items: [
+            { label: "Validasi Nilai", path: "/admin/validasi-admin"},
+            { label: "Laporan Akademik", path: "/admin/laporan-akademik"},
+        ]   
+    },
 
     
   ],
