@@ -1,21 +1,76 @@
 import { useState } from "react";
+// IMPORT AXIOS
+import axiosInstance from '../../api/axios'; 
 
 function Administrasi() {
-
   const [status, setStatus] = useState("Belum Bayar");
   const [file, setFile] = useState(null);
+  // Tambahan state untuk mencegah double-click saat upload
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+       // Validasi ukuran maksimal 2MB di sisi frontend
+       if (selectedFile.size > 2 * 1024 * 1024) {
+         alert("Gagal: Ukuran file maksimal adalah 2MB.");
+         e.target.value = null; // Reset input
+         return;
+       }
+       setFile(selectedFile);
+    }
   };
 
-  const handleSubmit = () => {
+  // ==========================================
+  // LOGIKA PENGIRIMAN FILE KE BACKEND (UPDATE)
+  // ==========================================
+  const handleSubmit = async () => {
     if (!file) {
       alert("Silakan pilih bukti pembayaran terlebih dahulu.");
       return;
     }
-    alert("Bukti pembayaran berhasil dikirim.");
-    setStatus("Menunggu Validasi Staff");
+
+    setIsLoading(true);
+
+    // Wajib menggunakan FormData untuk mengirim file fisik
+    const formData = new FormData();
+    formData.append('file_slip_pembayaran', file);
+
+    try {
+      // Tembak API Backend Laravel
+      const response = await axiosInstance.post('/api/mahasiswa/slip-pembayaran', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Header krusial untuk upload file
+        },
+      });
+
+      alert(response.data.message || "Bukti pembayaran berhasil dikirim ke sistem.");
+      setStatus("Menunggu Validasi Staff");
+
+    } catch (error) {
+      console.error("Error Upload:", error);
+      if (error.response) {
+        if (error.response.status === 400) {
+          // Jika mahasiswa sudah pernah upload dan statusnya masih Pending/Valid
+          alert(error.response.data.message);
+          
+          // Ubah status UI jika ternyata sudah valid atau masih pending
+          if(error.response.data.message.includes('Valid')) {
+             setStatus("Tervalidasi");
+          } else {
+             setStatus("Menunggu Validasi Staff");
+          }
+        } else if (error.response.status === 422) {
+          alert("Gagal: Format file tidak didukung (gunakan JPG/PNG/PDF) atau ukuran melebihi 2MB.");
+        } else {
+          alert("Gagal memproses data. Terjadi kesalahan pada server.");
+        }
+      } else {
+        alert("Gagal terhubung ke server backend.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Hanya memodifikasi output string kelas Tailwind agar sesuai palet BTA
@@ -127,9 +182,14 @@ function Administrasi() {
 
             <button
               onClick={handleSubmit}
-              className="w-full sm:w-auto bg-bta-green hover:bg-green-900 text-white px-8 py-4 rounded-xl font-black tracking-wide shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              disabled={isLoading}
+              className={`w-full sm:w-auto px-8 py-4 rounded-xl font-black tracking-wide shadow-lg transition-all duration-300 ${
+                isLoading 
+                ? 'bg-gray-400 text-white cursor-not-allowed' 
+                : 'bg-bta-green hover:bg-green-900 text-white hover:shadow-xl hover:-translate-y-1'
+              }`}
             >
-              Kirim Bukti Pembayaran
+              {isLoading ? 'Sedang Mengunggah...' : 'Kirim Bukti Pembayaran'}
             </button>
           </div>
         )}

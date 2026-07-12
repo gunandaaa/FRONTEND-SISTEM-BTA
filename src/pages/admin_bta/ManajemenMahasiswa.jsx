@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -7,108 +7,166 @@ import {
   X, 
   Filter, 
   GraduationCap, 
-  UserPlus,
-  CheckCircle2,
-  AlertCircle
+  UserPlus
 } from 'lucide-react';
+// 1. IMPORT AXIOS
+import axiosInstance from '../../api/axios'; 
 
 const ManajemenMahasiswa = () => {
   // ==========================================
-  // MASTER STATE & SIMULASI DATA MAHASISWA
+  // MASTER STATE & INTEGRASI BACKEND
   // ==========================================
-  const [students, setStudents] = useState([
-    { id: 1, nim: "202601001", nama: "Rifqi Al-Faruq", prodi: "S1 Informatika", kelas: "MQ 2 - A", status: "Aktif" },
-    { id: 2, nim: "202601002", nama: "Ahmad Maufur", prodi: "S1 Informatika", kelas: "MQ 2 - A", status: "Aktif" },
-    { id: 3, nim: "202602015", nama: "Siti Aminah", prodi: "S1 Pendidikan Agama Islam", kelas: "MQ 1 - B", status: "Aktif" },
-    { id: 4, nim: "202603009", nama: "Zainal Abidin", prodi: "S1 Sistem Informasi", kelas: "Belum Plotting", status: "Cuti" }
-  ]);
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // State Kontrol UI
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("add"); // "add" atau "edit"
+  const [modalMode, setModalMode] = useState("add"); 
   
   // State Form Input
   const [selectedId, setSelectedId] = useState(null);
   const [formValues, setFormValues] = useState({
     nim: "",
-    nama: "",
-    prodi: "S1 Informatika",
+    name: "", // Diubah menjadi 'name' sesuai backend users table
+    program_studi: "S1 Informatika",
+    fakultas: "Fakultas Sains dan Teknologi", // Tambahan sesuai backend
+    // Kelas dan Status dipertahankan untuk UI form, meski belum disimpan ke DB backend
     kelas: "Belum Plotting",
     status: "Aktif"
   });
 
-  // Logika Pencarian & Filter
+  // ==========================================
+  // READ: FETCH DATA DARI API
+  // ==========================================
+  const fetchStudents = async (query = "") => {
+    setIsLoading(true);
+    try {
+      const url = query 
+        ? `/api/admin/mahasiswa?search_nama=${query}` 
+        : `/api/admin/mahasiswa`;
+        
+      const response = await axiosInstance.get(url);
+      
+      // Ambil array data dari paginasi Laravel
+      const dataMahasiswa = response.data.data.data || [];
+      setStudents(dataMahasiswa);
+    } catch (error) {
+      console.error("Error memuat data:", error);
+      alert("Gagal memuat data dari server.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Panggil pertama kali
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  // Debounce untuk pencarian
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchStudents(searchTerm);
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  // Filter Status Lokal (karena backend belum support filter status)
   const filteredStudents = students.filter(student => {
-    const matchSearch = student.nama.toLowerCase().includes(searchTerm.toLowerCase()) || student.nim.includes(searchTerm);
-    const matchStatus = filterStatus ? student.status === filterStatus : true;
-    return matchSearch && matchStatus;
+    // Simulasi status aktif (default) jika backend tidak mereturn status
+    const studentStatus = student.status || "Aktif";
+    return filterStatus ? studentStatus === filterStatus : true;
   });
 
   // ==========================================
-  // AKSI OPERASIONAL CRUD (SIMULASI BACKEND)
+  // AKSI OPERASIONAL CRUD 
   // ==========================================
   
-  // Handle Buka Modal Tambah
   const openAddModal = () => {
     setModalMode("add");
-    setFormValues({ nim: "", nama: "", prodi: "S1 Informatika", kelas: "Belum Plotting", status: "Aktif" });
-    setShowModal(true);
-  };
-
-  // Handle Buka Modal Ubah (Edit)
-  const openEditModal = (student) => {
-    setModalMode("edit");
-    setSelectedId(student.id);
-    setFormValues({
-      nim: student.nim,
-      nama: student.nama,
-      prodi: student.prodi,
-      kelas: student.kelas,
-      status: student.status
+    setFormValues({ 
+      nim: "", name: "", program_studi: "S1 Informatika", 
+      fakultas: "Fakultas Sains dan Teknologi", kelas: "Belum Plotting", status: "Aktif" 
     });
     setShowModal(true);
   };
 
-  // Handle Perubahan Input Form
+// ==========================================
+  // BUKA MODAL EDIT (SUDAH DIAKTIFKAN)
+  // ==========================================
+  const openEditModal = (student) => {
+    setModalMode("edit");
+    setSelectedId(student.id);
+    
+    // Tarik data saat ini dari baris tabel dan masukkan ke dalam form
+    setFormValues({
+      nim: student.nim,
+      name: student.user?.name || "", // Ambil nama dari relasi tabel user
+      program_studi: student.program_studi,
+      fakultas: student.fakultas,
+      kelas: student.kelas || "Belum Plotting",
+      status: student.status || "Aktif"
+    });
+    
+    setShowModal(true); // Tampilkan modal
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
   };
 
-  // Simpan Data (Tambah & Update)
-  const handleSaveSubmit = (e) => {
+// ==========================================
+  // SIMPAN DATA (TAMBAH & UBAH VIA API)
+  // ==========================================
+  const handleSaveSubmit = async (e) => {
     e.preventDefault();
-    if (!formValues.nim.trim() || !formValues.nama.trim()) {
+    if (!formValues.nim.trim() || !formValues.name.trim()) {
       alert("NIM dan Nama Mahasiswa wajib diisi.");
       return;
     }
 
-    if (modalMode === "add") {
-      // Operasional CREATE
-      const newStudent = {
-        id: Date.now(),
-        ...formValues
-      };
-      setStudents([...students, newStudent]);
-      alert(`Sukses menambahkan mahasiswa baru: ${formValues.nama}`);
-    } else {
-      // Operasional UPDATE
-      setStudents(students.map(item => 
-        item.id === selectedId ? { ...item, ...formValues } : item
-      ));
-      alert(`Sukses memperbarui data mahasiswa: ${formValues.nama}`);
-    }
+    setIsSubmitting(true);
 
-    setShowModal(false);
+    try {
+      if (modalMode === "add") {
+        // Mode Tambah: Gunakan POST
+        await axiosInstance.post('/api/admin/mahasiswa', formValues);
+        alert(`Sukses menambahkan mahasiswa baru: ${formValues.name}`);
+      } else {
+        // Mode Edit: Gunakan PUT beserta ID mahasiswa
+        await axiosInstance.put(`/api/admin/mahasiswa/${selectedId}`, formValues);
+        alert(`Sukses memperbarui data mahasiswa: ${formValues.name}`);
+      }
+
+      setShowModal(false); // Tutup modal setelah sukses
+      fetchStudents();     // Refresh tabel secara otomatis
+    } catch (error) {
+      console.error("Gagal simpan:", error);
+      if (error.response?.status === 422) {
+        alert("Gagal: Pastikan isian sudah benar dan NIM belum digunakan oleh mahasiswa lain.");
+      } else {
+        alert("Terjadi kesalahan pada server saat memproses data.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // Hapus Data (Delete)
-  const handleDelete = (id, nama) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus data mahasiswa atas nama ${nama}?`)) {
-      setStudents(students.filter(item => item.id !== id));
-      alert(`Data mahasiswa ${nama} berhasil dihapus dari sistem.`);
+  // DELETE DATA DI API
+  const handleDelete = async (id, nama) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus permanen data mahasiswa atas nama ${nama}?`)) {
+      try {
+        await axiosInstance.delete(`/api/admin/mahasiswa/${id}`);
+        alert(`Data mahasiswa ${nama} berhasil dihapus dari sistem.`);
+        fetchStudents(); // Refresh tabel
+      } catch (error) {
+        console.error("Gagal hapus:", error);
+        alert(error.response?.data?.message || "Gagal menghapus data.");
+      }
     }
   };
 
@@ -187,7 +245,16 @@ const ManajemenMahasiswa = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm text-gray-700 font-medium">
-              {filteredStudents.length === 0 ? (
+              {isLoading ? (
+                 <tr>
+                 <td colSpan="6" className="p-12 text-center text-gray-400 font-medium">
+                   <div className="flex flex-col items-center justify-center space-y-3">
+                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F4C3A]"></div>
+                     <p>Memuat data dari server...</p>
+                   </div>
+                 </td>
+               </tr>
+              ) : filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-12 text-center text-gray-400 font-medium">
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -200,24 +267,25 @@ const ManajemenMahasiswa = () => {
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-gray-50/50 transition-colors duration-150">
                     <td className="p-5 font-mono text-gray-500 font-bold text-xs">{student.nim}</td>
-                    <td className="p-5 font-black text-gray-800">{student.nama}</td>
-                    <td className="p-5 text-gray-600 font-semibold">{student.prodi}</td>
+                    {/* Tarik nama dari relasi tabel user */}
+                    <td className="p-5 font-black text-gray-800">{student.user?.name || "Nama tidak tersedia"}</td>
+                    <td className="p-5 text-gray-600 font-semibold">{student.program_studi}</td>
                     <td className="p-5">
                       <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                        student.kelas === 'Belum Plotting' 
+                        (student.kelas || 'Belum Plotting') === 'Belum Plotting' 
                           ? 'bg-orange-50 text-orange-600 border border-orange-100' 
                           : 'bg-green-50 text-[#0F4C3A] border border-[#0F4C3A]/10'
                       }`}>
-                        {student.kelas}
+                        {student.kelas || "Belum Plotting"}
                       </span>
                     </td>
                     <td className="p-5 text-center">
                       <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${
-                        student.status === 'Aktif' 
+                        (student.status || 'Aktif') === 'Aktif' 
                           ? 'bg-green-50 text-[#0F4C3A] border border-[#0F4C3A]/20' 
                           : 'bg-gray-100 text-gray-500'
                       }`}>
-                        {student.status}
+                        {student.status || "Aktif"}
                       </span>
                     </td>
                     <td className="p-5">
@@ -230,7 +298,7 @@ const ManajemenMahasiswa = () => {
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => handleDelete(student.id, student.nama)}
+                          onClick={() => handleDelete(student.id, student.user?.name)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100"
                           title="Hapus Data"
                         >
@@ -258,7 +326,7 @@ const ManajemenMahasiswa = () => {
                 <UserPlus size={20} className="text-[#FAEA29]" />
                 {modalMode === "add" ? "Tambah Mahasiswa Baru" : "Perbarui Data Mahasiswa"}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-white/60 hover:text-white transition-colors relative z-10">
+              <button onClick={() => !isSubmitting && setShowModal(false)} className="text-white/60 hover:text-white transition-colors relative z-10">
                 <X size={24} />
               </button>
             </div>
@@ -282,27 +350,48 @@ const ManajemenMahasiswa = () => {
                   />
                 </div>
 
-                {/* Input Nama */}
+                {/* Input Nama (Diubah name attributenya jadi 'name') */}
                 <div>
                   <label className="block text-xs font-black text-[#0F4C3A] uppercase tracking-wider mb-2">Nama Lengkap Mahasiswa</label>
                   <input
                     type="text"
-                    name="nama"
+                    name="name" 
                     required
                     placeholder="Masukkan nama sesuai KTP/KTM"
-                    value={formValues.nama}
+                    value={formValues.name}
                     onChange={handleInputChange}
                     className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 focus:outline-none focus:border-[#0F4C3A] focus:ring-1 focus:ring-[#0F4C3A] transition-all"
                   />
                 </div>
 
-                {/* Dropdown Program Studi */}
+                {/* Tambahan Dropdown Fakultas dari API Backend */}
+                <div>
+                  <label className="block text-xs font-black text-[#0F4C3A] uppercase tracking-wider mb-2">Fakultas</label>
+                  <div className="relative">
+                    <select
+                      name="fakultas"
+                      value={formValues.fakultas}
+                      onChange={handleInputChange}
+                      className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:border-[#0F4C3A] cursor-pointer appearance-none"
+                    >
+                      <option value="Fakultas Sains dan Teknologi">Fakultas Sains dan Teknologi</option>
+                      <option value="Fakultas Ilmu Pendidikan">Fakultas Ilmu Pendidikan</option>
+                      <option value="Fakultas Ekonomi dan Bisnis">Fakultas Ekonomi dan Bisnis</option>
+                      <option value="Fakultas Agama Islam">Fakultas Agama Islam</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dropdown Program Studi (Diubah namenya menjadi program_studi) */}
                 <div>
                   <label className="block text-xs font-black text-[#0F4C3A] uppercase tracking-wider mb-2">Program Studi</label>
                   <div className="relative">
                     <select
-                      name="prodi"
-                      value={formValues.prodi}
+                      name="program_studi"
+                      value={formValues.program_studi}
                       onChange={handleInputChange}
                       className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:border-[#0F4C3A] cursor-pointer appearance-none"
                     >
@@ -366,15 +455,17 @@ const ManajemenMahasiswa = () => {
                 <button 
                   type="button"
                   onClick={() => setShowModal(false)}
+                  disabled={isSubmitting}
                   className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-200 transition-colors"
                 >
                   Batal
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-2.5 bg-[#0F4C3A] hover:bg-[#0a382a] text-white font-black rounded-xl text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-[#0F4C3A] hover:bg-[#0a382a] text-white font-black rounded-xl text-sm shadow-lg disabled:opacity-50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  {modalMode === "add" ? "Simpan Mahasiswa" : "Perbarui Data"}
+                  {isSubmitting ? 'Menyimpan...' : (modalMode === "add" ? "Simpan Mahasiswa" : "Perbarui Data")}
                 </button>
               </div>
             </form>
