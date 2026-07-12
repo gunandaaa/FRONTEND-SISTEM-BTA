@@ -27,8 +27,13 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Jika backend merespons 401 (Unauthenticated)
-    if (error.response && error.response.status === 401) {
+    // Jika backend merespons 401 (Unauthenticated) pada rute selain /login
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      error.config &&
+      !error.config.url.includes('/login')
+    ) {
       // Hapus data user dan token di local storage jika ada
       localStorage.removeItem('user');
       localStorage.removeItem('token');

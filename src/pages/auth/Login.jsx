@@ -68,11 +68,11 @@ const Login = () => {
     } catch (error) {
       // 4. Penanganan Error yang Lebih Spesifik
       if (error.response) {
+        const backendMsg = error.response.data?.message;
         if (error.response.status === 422 || error.response.status === 401) {
-          // Laravel secara default memberikan status 422/401 saat kredensial salah
-          setErrorMessage("Username atau password salah.");
+          setErrorMessage(backendMsg || "Username atau password salah.");
         } else {
-          setErrorMessage("Terjadi kesalahan pada server. Silakan coba lagi.");
+          setErrorMessage(backendMsg || "Terjadi kesalahan pada server. Silakan coba lagi.");
         }
       } else {
         setErrorMessage("Gagal terhubung ke server backend.");
