@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import abahImg from '../assets/abah.png'; 
 
+// Import foto dokumentasi (Pastikan path folder disesuaikan jika berbeda)
+import poto1 from '../assets/poto1.jpeg';
+import poto2 from '../assets/poto2.jpeg';
+import poto3 from '../assets/poto3.jpeg';
+import poto4 from '../assets/poto4.jpeg';
+import poto5 from '../assets/poto5.jpeg';
+import poto6 from '../assets/poto6.jpeg';
+
 // ==========================================
 // KOMPONEN PINTAR: ANIMASI REVEAL ON SCROLL
 // ==========================================
@@ -79,6 +87,9 @@ const LandingPage = () => {
     }
   };
 
+  // Kumpulan gambar dokumentasi
+  const dokumentasiPhotos = [poto1, poto2, poto3, poto4, poto5, poto6];
+
   return (
     // Menghapus overflow-hidden dari pembungkus utama agar animasi dan layout berjalan lancar
     <div className="min-h-screen bg-gray-50 font-sans text-bta-black selection:bg-bta-yellow selection:text-bta-green flex flex-col relative overflow-x-hidden">
@@ -114,7 +125,6 @@ const LandingPage = () => {
       </nav>
 
       {/* 2. HERO SECTION */}
-      {/* Menambahkan padding-top ekstra (pt-32) karena Navbar sekarang menggunakan posisi fixed */}
       <section id="beranda" className="relative bg-bta-green pt-32 pb-24 md:pt-40 md:pb-32">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-bta-yellow/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -226,7 +236,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* 4. DOKUMENTASI SECTION */}
+      {/* 4. DOKUMENTASI SECTION (SUDAH DIPERBARUI) */}
       <section id="dokumentasi" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <RevealOnScroll direction="up" delay={0}>
@@ -237,13 +247,15 @@ const LandingPage = () => {
           </RevealOnScroll>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {[1, 2, 3, 4, 5, 6].map((item, index) => (
-              <RevealOnScroll key={item} direction="up" delay={index * 150}>
+            {/* Menggunakan array dokumentasiPhotos untuk menampilkan gambar */}
+            {dokumentasiPhotos.map((imgSrc, index) => (
+              <RevealOnScroll key={index} direction="up" delay={index * 150}>
                 <div className="bg-gray-100 aspect-[4/3] rounded-2xl flex items-center justify-center shadow-inner hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden border border-gray-200 hover:border-bta-yellow">
-                   <div className="text-gray-400 font-bold group-hover:scale-110 group-hover:text-bta-green transition-all duration-300 flex flex-col items-center">
-                      <svg className="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      Foto {item}
-                   </div>
+                   <img 
+                      src={imgSrc} 
+                      alt={`Dokumentasi Kegiatan ${index + 1}`} 
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" 
+                   />
                 </div>
               </RevealOnScroll>
             ))}
