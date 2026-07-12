@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Save, 
@@ -6,49 +6,51 @@ import {
   CheckCircle2, 
   HelpCircle,
   AlertCircle,
-  FileCheck
+  FileCheck,
+  RefreshCw
 } from 'lucide-react';
+import axiosInstance from '../../api/axios';
 
 const TesPenempatan = () => {
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      nim: "202601001",
-      nama: "Rifqi Al-Faruq",
-      prodi: "S1 Informatika",
-      status: "Belum Dites",
-      nilai: { makhorijul: "", tajwid: "", sifatul_huruf: "" }
-    },
-    {
-      id: 2,
-      nim: "202601002",
-      nama: "Ahmad Maufur",
-      prodi: "S1 Informatika",
-      status: "MQ 1",
-      nilai: { makhorijul: "75", tajwid: "70", sifatul_huruf: "72" }
-    },
-    {
-      id: 3,
-      nim: "202602015",
-      nama: "Siti Aminah",
-      prodi: "S1 Pendidikan Agama Islam",
-      status: "Belum Dites",
-      nilai: { makhorijul: "", tajwid: "", sifatul_huruf: "" }
-    },
-    {
-      id: 4,
-      nim: "202603009",
-      nama: "Zainal Abidin",
-      prodi: "S1 Hukum Keluarga Islam",
-      status: "MQ 2",
-      nilai: { makhorijul: "88", tajwid: "90", sifatul_huruf: "85" }
-    }
-  ]);
-
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // State untuk mode edit baris (inline editing)
   const [editingId, setEditingId] = useState(null);
   const [inputValues, setInputValues] = useState({ makhorijul: "", tajwid: "", sifatul_huruf: "" });
   const [validationError, setValidationError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ==========================================
+  // READ: FETCH DATA MAHASISWA BELUM TES
+  // ==========================================
+  const fetchBelumTes = async () => {
+    setIsLoading(true);
+    setValidationError("");
+    try {
+      const response = await axiosInstance.get('/api/admin/tes-penempatan/belum-tes');
+      // Format data dari backend agar sesuai dengan struktur tabel UI
+      const formattedData = response.data.data.map(mhs => ({
+        id: mhs.id,
+        nim: mhs.nim,
+        nama: mhs.user?.name || "Nama Tidak Tersedia",
+        prodi: mhs.program_studi,
+        status: "Belum Dites",
+        nilai: { makhorijul: "", tajwid: "", sifatul_huruf: "" } // Komponen sementara di UI
+      }));
+      setStudents(formattedData);
+    } catch (error) {
+      console.error("Gagal mengambil data:", error);
+      setValidationError("Gagal mengambil data dari server.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBelumTes();
+  }, []);
 
   const filteredStudents = students.filter(student => 
     student.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,11 +72,15 @@ const TesPenempatan = () => {
     setInputValues({ ...inputValues, [name]: value });
   };
 
-  const handleSaveValues = (id) => {
+  // ==========================================
+  // UPDATE: KIRIM RATA-RATA KE BACKEND
+  // ==========================================
+  const handleSaveValues = async (id) => {
     const { makhorijul, tajwid, sifatul_huruf } = inputValues;
 
+    // 1. Validasi Kolom Kosong
     if (!makhorijul || !tajwid || !sifatul_huruf) {
-      setValidationError("Semua kolom komponen nilai wajib diisi.");
+      setValidationError("Semua komponen nilai (Makhorijul, Tajwid, Sifatul Huruf) wajib diisi.");
       return;
     }
 
@@ -82,32 +88,51 @@ const TesPenempatan = () => {
     const tVal = parseInt(tajwid);
     const sVal = parseInt(sifatul_huruf);
 
-    if (mVal < 50 || mVal > 100 || tVal < 50 || tVal > 100 || sVal < 50 || sVal > 100) {
-      setValidationError("Batas input nilai komponen harus berada di rentang 50 - 100.");
+    // 2. Validasi Rentang Nilai (0 - 100)
+    if (mVal < 0 || mVal > 100 || tVal < 0 || tVal > 100 || sVal < 0 || sVal > 100) {
+      setValidationError("Input nilai harus berada di rentang 0 - 100.");
       return;
     }
 
-    const average = (mVal + tVal + sVal) / 3;
-    const penempatanOtomatis = average >= 75 ? "MQ 2" : "MQ 1";
-
-    setStudents(students.map(student => {
-      if (student.id === id) {
-        return {
-          ...student,
-          status: penempatanOtomatis,
-          nilai: { makhorijul, tajwid, sifatul_huruf }
-        };
-      }
-      return student;
-    }));
-
-    setEditingId(null);
+    // 3. Kalkulasi Rata-rata
+    const average = Math.round((mVal + tVal + sVal) / 3);
+    
+    setIsSubmitting(true);
     setValidationError("");
-    alert(`Data nilai berhasil disimpan ke sistem! Berdasarkan nilai rata-rata (${average.toFixed(1)}), mahasiswa dialokasikan ke ${penempatanOtomatis}.`);
+
+    try {
+      // 4. Tembak API (Hanya mengirim mahasiswa_id dan nilai rata-rata)
+      const response = await axiosInstance.post('/api/admin/tes-penempatan/input-nilai', {
+        mahasiswa_id: id,
+        nilai_tes: average
+      });
+
+      alert(`Sukses: ${response.data.message}\n(Rata-rata: ${average})`);
+      
+      setEditingId(null);
+      // Refresh tabel agar mahasiswa yang sudah dites hilang dari daftar "Belum Tes"
+      fetchBelumTes();
+
+    } catch (error) {
+      console.error("Gagal simpan nilai:", error);
+      if (error.response) {
+        if (error.response.status === 422) {
+          setValidationError("Gagal validasi server. Pastikan rentang nilai min:0 di backend sudah diterapkan.");
+        } else if (error.response.status === 400) {
+          setValidationError(error.response.data.message); // Jika terdeteksi sudah pernah tes
+        } else {
+          setValidationError("Terjadi kesalahan pada server.");
+        }
+      } else {
+        setValidationError("Gagal terhubung ke server.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ==========================================
-  // TAMPILAN UI/UX BTA (DIPERBARUI)
+  // TAMPILAN UI/UX BTA
   // ==========================================
   return (
     <div className="space-y-8 animate-fade-in-up font-sans">
@@ -122,9 +147,15 @@ const TesPenempatan = () => {
             Tes Penempatan (Input Nilai Luring)
           </h1>
           <p className="text-gray-500 mt-2 font-medium">
-            Salin dan digitalisasikan data nilai hasil pengujian kertas lembar luring para Ustadz ke dalam sistem aplikasi BTA.
+            Salin dan digitalisasikan data nilai hasil pengujian luring ke dalam sistem.
           </p>
         </div>
+        <button 
+          onClick={fetchBelumTes}
+          className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-bta-green transition-colors"
+        >
+          <RefreshCw size={16} /> Segarkan Data
+        </button>
       </div>
 
       {/* TOOLBAR PENCARIAN UTAMA */}
@@ -135,7 +166,7 @@ const TesPenempatan = () => {
           </span>
           <input 
             type="text"
-            placeholder="Ketik NIM atau Nama Mahasiswa untuk mencari..."
+            placeholder="Ketik NIM atau Nama Mahasiswa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-700 placeholder-gray-400 transition-all"
@@ -166,12 +197,21 @@ const TesPenempatan = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm text-gray-700 font-medium">
-              {filteredStudents.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="p-12 text-center text-gray-400 font-medium">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bta-green"></div>
+                      <p>Mencari antrean mahasiswa...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="p-12 text-center text-gray-400 font-medium">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <Search size={32} className="text-gray-300" />
-                      <p>Mahasiswa yang Anda cari tidak ditemukan.</p>
+                      <CheckCircle2 size={40} className="text-green-500/50" />
+                      <p>Semua mahasiswa sudah mendapatkan nilai tes.</p>
                     </div>
                   </td>
                 </tr>
@@ -191,102 +231,94 @@ const TesPenempatan = () => {
                         </div>
                       </td>
                       
-                      {/* Form Input / Output: Makhorijul Huruf */}
+                      {/* Form Input: Makhorijul */}
                       <td className="p-5 text-center">
                         {isEditing ? (
                           <input 
                             type="number"
                             name="makhorijul"
-                            min="50"
+                            min="0"
                             max="100"
                             value={inputValues.makhorijul}
                             onChange={handleInputChange}
-                            className="w-24 text-center py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
-                            placeholder="50-100"
+                            className="w-20 text-center py-2.5 px-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
+                            placeholder="0-100"
                           />
                         ) : (
-                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg ${student.nilai.makhorijul ? 'text-gray-800 bg-gray-50 border border-gray-100' : 'text-gray-300'}`}>
-                            {student.nilai.makhorijul || "—"}
+                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg text-gray-300`}>
+                            —
                           </span>
                         )}
                       </td>
 
-                      {/* Form Input / Output: Tajwid */}
+                      {/* Form Input: Tajwid */}
                       <td className="p-5 text-center">
                         {isEditing ? (
                           <input 
                             type="number"
                             name="tajwid"
-                            min="50"
+                            min="0"
                             max="100"
                             value={inputValues.tajwid}
                             onChange={handleInputChange}
-                            className="w-24 text-center py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
-                            placeholder="50-100"
+                            className="w-20 text-center py-2.5 px-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
+                            placeholder="0-100"
                           />
                         ) : (
-                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg ${student.nilai.tajwid ? 'text-gray-800 bg-gray-50 border border-gray-100' : 'text-gray-300'}`}>
-                            {student.nilai.tajwid || "—"}
+                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg text-gray-300`}>
+                            —
                           </span>
                         )}
                       </td>
 
-                      {/* Form Input / Output: Sifatul Huruf */}
+                      {/* Form Input: Sifatul Huruf */}
                       <td className="p-5 text-center">
                         {isEditing ? (
                           <input 
                             type="number"
                             name="sifatul_huruf"
-                            min="50"
+                            min="0"
                             max="100"
                             value={inputValues.sifatul_huruf}
                             onChange={handleInputChange}
-                            className="w-24 text-center py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
-                            placeholder="50-100"
+                            className="w-20 text-center py-2.5 px-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black focus:outline-none focus:border-bta-green focus:ring-1 focus:ring-bta-green text-gray-800 shadow-inner transition-all"
+                            placeholder="0-100"
                           />
                         ) : (
-                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg ${student.nilai.sifatul_huruf ? 'text-gray-800 bg-gray-50 border border-gray-100' : 'text-gray-300'}`}>
-                            {student.nilai.sifatul_huruf || "—"}
+                          <span className={`font-mono text-base font-black px-3 py-1.5 rounded-lg text-gray-300`}>
+                            —
                           </span>
                         )}
                       </td>
 
-                      {/* Status Penempatan Badges */}
+                      {/* Status Badges */}
                       <td className="p-5 text-center">
-                        {student.status === "Belum Dites" && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-gray-50 text-gray-500 border border-gray-200">
-                            <HelpCircle size={12} />
-                            Belum Dites
-                          </span>
-                        )}
-                        {student.status === "MQ 1" && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-bta-yellow/20 text-yellow-700 border border-bta-yellow/40">
-                            <CheckCircle2 size={12} />
-                            Tingkat MQ 1
-                          </span>
-                        )}
-                        {student.status === "MQ 2" && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-green-50 text-bta-green border border-bta-green/20">
-                            <CheckCircle2 size={12} />
-                            Tingkat MQ 2
-                          </span>
-                        )}
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-gray-50 text-gray-500 border border-gray-200">
+                          <HelpCircle size={12} />
+                          Belum Dites
+                        </span>
                       </td>
 
-                      {/* Tombol Aksi Operasional Form */}
+                      {/* Tombol Aksi */}
                       <td className="p-5 text-center">
                         {isEditing ? (
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={() => handleSaveValues(student.id)}
-                              className="flex items-center justify-center gap-1.5 bg-bta-green hover:bg-green-900 text-white font-black text-xs py-2 px-3 rounded-xl shadow-md transition-all hover:-translate-y-0.5"
+                              disabled={isSubmitting}
+                              className="flex items-center justify-center gap-1.5 bg-bta-green hover:bg-green-900 text-white font-black text-xs py-2 px-3 rounded-xl shadow-md transition-all disabled:opacity-50"
                             >
-                              <Save size={14} />
+                              {isSubmitting ? (
+                                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              ) : (
+                                <Save size={14} />
+                              )}
                               <span>Simpan</span>
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="bg-white hover:bg-gray-100 text-gray-500 border border-gray-200 font-bold text-xs py-2 px-3 rounded-xl transition-colors"
+                              disabled={isSubmitting}
+                              className="bg-white hover:bg-gray-100 text-gray-500 border border-gray-200 font-bold text-xs py-2 px-3 rounded-xl transition-colors disabled:opacity-50"
                             >
                               Batal
                             </button>
@@ -297,7 +329,7 @@ const TesPenempatan = () => {
                             className="inline-flex items-center justify-center gap-1.5 bg-white hover:bg-green-50 text-bta-green border border-bta-green/20 font-black text-xs py-2 px-4 rounded-xl shadow-sm hover:shadow transition-all"
                           >
                             <FileEdit size={14} />
-                            <span>{student.status === "Belum Dites" ? "Input Nilai" : "Edit Nilai"}</span>
+                            <span>Input Nilai</span>
                           </button>
                         )}
                       </td>
