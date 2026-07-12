@@ -7,7 +7,7 @@ export const roleMenus = {
         items: [
             { label: "Data Tutor", path: "/admin/manajemen-tutor"},
             { label: "Data Mahasiswa", path: "/admin/manajemen-mahasiswa"},
-            { label: "Periode Akademik", path: "/admin/periode"},
+            { label: "Periode Akademik", path: "/admin/manajemen-periode"},
         ]   
     },
     {

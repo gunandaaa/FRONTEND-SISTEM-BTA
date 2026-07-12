@@ -27,6 +27,7 @@ import TesPenempatan from "./pages/admin_bta/TesPenempatan";
 import ManajemenKelas from "./pages/admin_bta/ManajemenKelas";
 import ValidasiNilai from "./pages/admin_bta/ValidasiNilai";
 import ManajemenTutor from "./pages/admin_bta/ManajemenTutor";
+import ManajemenPeriode from "./pages/admin_bta/ManajemenPeriode";
 
 
 import DashboardKepala from "./pages/kepala/Dashboard";
@@ -75,6 +76,7 @@ function App() {
           <Route path="manajemen-mahasiswa" element={<ManajemenMahasiswa />} />
           <Route path="validasi-nilai" element={<ValidasiNilai />} />
           <Route path="manajemen-tutor" element={<ManajemenTutor />} />
+          <Route path="manajemen-periode" element={<ManajemenPeriode />} />
         </Route>
 
         {/* ===================== KEPALA PUSAT ====================== */}
