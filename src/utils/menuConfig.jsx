@@ -16,14 +16,14 @@ export const roleMenus = {
         items: [
             { label: "Kelola Kelas", path: "/admin/manajemen-kelas"},
             { label: "Nilai Tes", path: "/admin/tes-penempatan"},
-            { label: "Validasi Slip Pembayaran", path: "/admin/validasi-slip-pembayaran"},
+            { label: "Validasi Slip Pembayaran", path: "/admin/validasi-administrasi"},
         ]   
     },
     {
         label: "Pelaporan",
         type: "group",
         items: [
-            { label: "Validasi Nilai", path: "/admin/validasi-admin"},
+            { label: "Validasi Nilai", path: "/admin/validasi-nilai"},
             { label: "Laporan Akademik", path: "/admin/laporan-akademik"},
         ]   
     },

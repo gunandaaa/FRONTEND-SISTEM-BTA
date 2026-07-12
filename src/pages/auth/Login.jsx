@@ -35,15 +35,21 @@ const Login = () => {
     setErrorMessage("");
 
     try {
-      // 1. Dapatkan CSRF Cookie (Wajib sebelum melakukan POST ke login)
-      await axiosInstance.get("/sanctum/csrf-cookie");
+      // 1. Dapatkan CSRF Cookie (Abaikan error jika cross-domain / third-party cookies diblokir browser)
+      await axiosInstance.get("/sanctum/csrf-cookie").catch(() => {});
 
-      // 2. Kirim data login 
-      // CATATAN: Jika baseURL di axios.js sudah benar, gunakan '/login' saja
-      // Jika masih ada masalah 404, coba '/api/login'
+      // 2. Kirim data login ke backend cPanel
       const response = await axiosInstance.post("/api/login", credentials);
       
-      // 3. Logika Role
+      // 3. Simpan token & user di localStorage (mendukung Vercel & cPanel lintas domain)
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
+
+      // 4. Logika Role
       const userRole = response.data.user.role.toLowerCase().trim();
 
       if (userRole === "mahasiswa") {

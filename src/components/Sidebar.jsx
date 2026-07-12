@@ -1,10 +1,25 @@
 import { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { roleMenus } from "../utils/menuConfig";
+import axiosInstance from "../api/axios";
 
 const Sidebar = ({ isOpen, closeSidebar, role, roleTitle }) => {
   const menuItems = roleMenus[role] || [];
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.post("/api/logout");
+    } catch (err) {
+      // Abaikan error jaringan saat logout
+    } finally {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      navigate("/");
+    }
+  };
 
   // 1. State untuk hanya satu grup yang terbuka (Accordion)
   const [openGroup, setOpenGroup] = useState(null);
@@ -112,12 +127,12 @@ const Sidebar = ({ isOpen, closeSidebar, role, roleTitle }) => {
 
       {/* Tombol Logout */}
       <div className="p-5 border-t border-white/10 mb-2">
-        <NavLink
-          to="/"
+        <button
+          onClick={handleLogout}
           className="block w-full text-center bg-red-500/20 border border-red-500/40 hover:bg-red-500 text-red-100 hover:text-white py-3.5 rounded-xl font-bold transition-all shadow-sm"
         >
           Keluar Sistem
-        </NavLink>
+        </button>
       </div>
     </aside>
   );
