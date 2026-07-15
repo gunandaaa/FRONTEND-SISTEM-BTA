@@ -39,14 +39,15 @@ const ManajemenMahasiswa = () => {
   });
 
   // ==========================================
-  // READ: FETCH DATA DARI API
+  // READ: FETCH DATA DARI API (DIPERBAIKI DENGAN FULL URL)
   // ==========================================
   const fetchStudents = async (query = "") => {
     setIsLoading(true);
     try {
+      // PENAMBAHAN FULL URL KE PORT 8000
       const url = query 
-        ? `/api/admin/mahasiswa?search_nama=${query}` 
-        : `/api/admin/mahasiswa`;
+        ? `http://127.0.0.1:8000/api/admin/mahasiswa?search_nama=${query}` 
+        : `http://127.0.0.1:8000/api/admin/mahasiswa`;
         
       const response = await axiosInstance.get(url);
       
@@ -94,7 +95,7 @@ const ManajemenMahasiswa = () => {
     setShowModal(true);
   };
 
-// ==========================================
+  // ==========================================
   // BUKA MODAL EDIT (SUDAH DIAKTIFKAN)
   // ==========================================
   const openEditModal = (student) => {
@@ -119,8 +120,8 @@ const ManajemenMahasiswa = () => {
     setFormValues({ ...formValues, [name]: value });
   };
 
-// ==========================================
-  // SIMPAN DATA (TAMBAH & UBAH VIA API)
+  // ==========================================
+  // SIMPAN DATA (TAMBAH & UBAH VIA API DIPERBAIKI DENGAN FULL URL)
   // ==========================================
   const handleSaveSubmit = async (e) => {
     e.preventDefault();
@@ -133,12 +134,12 @@ const ManajemenMahasiswa = () => {
 
     try {
       if (modalMode === "add") {
-        // Mode Tambah: Gunakan POST
-        await axiosInstance.post('/api/admin/mahasiswa', formValues);
+        // Mode Tambah: Gunakan POST dengan Full URL
+        await axiosInstance.post('http://127.0.0.1:8000/api/admin/mahasiswa', formValues);
         alert(`Sukses menambahkan mahasiswa baru: ${formValues.name}`);
       } else {
-        // Mode Edit: Gunakan PUT beserta ID mahasiswa
-        await axiosInstance.put(`/api/admin/mahasiswa/${selectedId}`, formValues);
+        // Mode Edit: Gunakan PUT dengan Full URL
+        await axiosInstance.put(`http://127.0.0.1:8000/api/admin/mahasiswa/${selectedId}`, formValues);
         alert(`Sukses memperbarui data mahasiswa: ${formValues.name}`);
       }
 
@@ -156,11 +157,14 @@ const ManajemenMahasiswa = () => {
     }
   };
 
-  // DELETE DATA DI API
+  // ==========================================
+  // DELETE DATA DI API (DIPERBAIKI DENGAN FULL URL)
+  // ==========================================
   const handleDelete = async (id, nama) => {
     if (window.confirm(`Apakah Anda yakin ingin menghapus permanen data mahasiswa atas nama ${nama}?`)) {
       try {
-        await axiosInstance.delete(`/api/admin/mahasiswa/${id}`);
+        // Mode Hapus: Gunakan DELETE dengan Full URL
+        await axiosInstance.delete(`http://127.0.0.1:8000/api/admin/mahasiswa/${id}`);
         alert(`Data mahasiswa ${nama} berhasil dihapus dari sistem.`);
         fetchStudents(); // Refresh tabel
       } catch (error) {
