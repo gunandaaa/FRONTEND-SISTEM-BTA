@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import abahImg from '../assets/abah.png'; 
 
-// Import foto dokumentasi (Pastikan path folder disesuaikan jika berbeda)
+
 import poto1 from '../assets/poto1.jpeg';
 import poto2 from '../assets/poto2.jpeg';
 import poto3 from '../assets/poto3.jpeg';
