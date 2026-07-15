@@ -35,6 +35,7 @@ const Login = () => {
     setErrorMessage("");
 
     try {
+<<<<<<< HEAD
       // 1. Tembak API Login (Kita tidak pakai csrf-cookie lagi karena menggunakan Bearer Token)
       const response = await axiosInstance.post("/api/login", credentials);
       
@@ -45,6 +46,23 @@ const Login = () => {
       }
       
       // 3. Logika Pengalihan Halaman Berdasarkan Role Spatie
+=======
+      // 1. Dapatkan CSRF Cookie (Abaikan error jika cross-domain / third-party cookies diblokir browser)
+      await axiosInstance.get("/sanctum/csrf-cookie").catch(() => {});
+
+      // 2. Kirim data login ke backend cPanel
+      const response = await axiosInstance.post("/api/login", credentials);
+      
+      // 3. Simpan token & user di localStorage (mendukung Vercel & cPanel lintas domain)
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
+
+      // 4. Logika Role
+>>>>>>> fc64aa7e5b66e30573beb5a8cd340cfc4dd0cd09
       const userRole = response.data.user.role.toLowerCase().trim();
 
       if (userRole === "mahasiswa") {
@@ -64,10 +82,12 @@ const Login = () => {
     } catch (error) {
       // 4. Penanganan Error yang Lebih Spesifik
       if (error.response) {
+        const backendMsg = error.response.data?.message;
         if (error.response.status === 422 || error.response.status === 401) {
-          setErrorMessage("NIM/Email atau password yang Anda masukkan salah.");
+
+          setErrorMessage(backendMsg || "Username atau password salah.");
         } else {
-          setErrorMessage("Terjadi kesalahan pada server. Silakan coba lagi.");
+          setErrorMessage(backendMsg || "Terjadi kesalahan pada server. Silakan coba lagi.");
         }
       } else {
         setErrorMessage("Gagal terhubung ke server backend.");
