@@ -10,14 +10,18 @@ function ManajemenKelas() {
   const [periodes, setPeriodes] = useState([]); 
   const [tutors, setTutors] = useState([]); 
   const [mahasiswas, setMahasiswas] = useState([]); 
+  const [eligibleMahasiswa, setEligibleMahasiswa] = useState([]);
   
   const [selectedPeriode, setSelectedPeriode] = useState("");
+  const [selectedKelasTingkat, setSelectedKelasTingkat] = useState("");
+  
   
   // State Loading
   const [isFetchingKelas, setIsFetchingKelas] = useState(true);
   const [isFetchingPeriodes, setIsFetchingPeriodes] = useState(true);
   const [isFetchingTutors, setIsFetchingTutors] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
+  const [isFetchingPeserta, setIsFetchingPeserta] = useState(false);
 
   // State Modals
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
@@ -27,7 +31,7 @@ function ManajemenKelas() {
   // State Form Data
   const [formDataCreate, setFormDataCreate] = useState({
     nama_kelas: "",
-    tingkat: "Menengah",
+    tingkat: "Menegah",
     kapasitas_jumlah: 20,
     jadwal: ""
   });
@@ -119,7 +123,7 @@ function ManajemenKelas() {
       setIsModalCreateOpen(false);
       
       // Reset form
-      setFormDataCreate({ nama_kelas: "", tingkat: "Menengah", kapasitas_jumlah: 20, jadwal: "" });
+      setFormDataCreate({ nama_kelas: "", tingkat: "Menegah", kapasitas_jumlah: 20, jadwal: "" });
     } catch (error) {
       alert("Gagal membuat kelas: " + (error.response?.data?.message || "Terjadi kesalahan"));
     } finally {
@@ -143,23 +147,45 @@ function ManajemenKelas() {
     }
   };
 
-  // Handler Tambah Peserta Massal (POST) - (Masih simulasi UI untuk data mahasiswa)
+  // Fungsi untuk mengambil mahasiswa berdasarkan hasil tes dan belum punya kelas
+const fetchMahasiswaTersedia = async (tingkat) => {
+  setIsFetchingPeserta(true);
+  try {
+    const response = await axiosInstance.get(`/api/admin/mahasiswa/tersedia?tingkat=${tingkat}`);
+    setEligibleMahasiswa(response.data.data || []);
+  } catch (error) {
+    console.error("Gagal mengambil data mahasiswa tersedia", error);
+    // Kosongkan list jika terjadi error
+    setEligibleMahasiswa([]);
+  } finally {
+    setIsFetchingPeserta(false);
+  }
+};
+
+  // Handler Tambah Peserta Massal (POST) 
   const handleTambahPeserta = async (e) => {
-    e.preventDefault();
-    if (selectedMahasiswaIds.length === 0) return alert("Pilih minimal 1 mahasiswa!");
+  e.preventDefault();
+  if (selectedMahasiswaIds.length === 0) return alert("Pilih minimal 1 mahasiswa!");
+  
+  setIsLoadingAction(true);
+  try {
+    await axiosInstance.post(`/api/admin/kelas/${selectedKelasId}/tambah-peserta`, { 
+      mahasiswa_id: selectedMahasiswaIds 
+    });
     
-    setIsLoadingAction(true);
-    try {
-      await axiosInstance.post(`/api/admin/kelas/${selectedKelasId}/tambah-peserta`, { mahasiswa_id: selectedMahasiswaIds });
-      fetchKelas();
-      setIsModalPesertaOpen(false);
-      setSelectedMahasiswaIds([]);
-    } catch (error) {
-      alert("Gagal menambah peserta: " + (error.response?.data?.message || "Terjadi kesalahan"));
-    } finally {
-      setIsLoadingAction(false);
-    }
-  };
+    alert(`${selectedMahasiswaIds.length} Mahasiswa berhasil dimasukkan ke kelas!`);
+    
+    fetchKelas(); // Refresh data kelas agar progress bar kapasitas bertambah
+    setIsModalPesertaOpen(false);
+    setSelectedMahasiswaIds([]); // Reset checklist
+    setEligibleMahasiswa([]); // Bersihkan state list peserta
+    
+  } catch (error) {
+    alert("Gagal menambah peserta: " + (error.response?.data?.message || "Terjadi kesalahan"));
+  } finally {
+    setIsLoadingAction(false);
+  }
+};
 
   // ==========================================
   // UTILITIES UI
@@ -298,12 +324,17 @@ function ManajemenKelas() {
                 {/* Footer Card (Aksi) */}
                 <div className="border-t border-gray-50 p-4 bg-gray-50/50 flex gap-2">
                   <button 
-                    disabled={isFull}
-                    onClick={() => { setSelectedKelasId(kelas.id); setIsModalPesertaOpen(true); }}
-                    className="flex-1 flex justify-center items-center py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-bta-green hover:text-white hover:border-bta-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed tooltip"
-                    title={isFull ? "Kelas Penuh" : "Tambah Peserta"}
+                  disabled={isFull}
+                  onClick={() => { 
+                  setSelectedKelasId(kelas.id); 
+                  setSelectedKelasTingkat(kelas.tingkat);
+                  fetchMahasiswaTersedia(kelas.tingkat); // Tarik data sesuai tingkat (Mahir/Menengah)
+                  setIsModalPesertaOpen(true); 
+                  }}
+                  className="flex-1 flex justify-center items-center py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-bta-green hover:text-white hover:border-bta-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed tooltip"
+                  title={isFull ? "Kelas Penuh" : "Tambah Peserta"}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                   </button>
                   <button 
                     onClick={() => { setSelectedKelasId(kelas.id); setIsModalPlotOpen(true); }}
@@ -432,56 +463,89 @@ function ManajemenKelas() {
         </div>
       )}
 
-      {/* MODAL 3: TAMBAH PESERTA (Simulasi UI) */}
+      {/* MODAL 3: TAMBAH PESERTA */}
       {isModalPesertaOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsModalPesertaOpen(false)}></div>
-          <div className="relative bg-white rounded-3xl w-full max-w-2xl shadow-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
-            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-black text-gray-800">Tambah Peserta</h2>
-                <p className="text-xs text-gray-500 mt-1">Pilih mahasiswa untuk dimasukkan ke kelas (Bulk Insert).</p>
-              </div>
-            </div>
-            
-            <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
-              <div className="space-y-3">
-                {[
-                  { id: 101, nama: "Budi Santoso", nim: "2023001" },
-                  { id: 102, nama: "Siti Aminah", nim: "2023002" },
-                  { id: 103, nama: "Dodi Pratama", nim: "2023003" },
-                ].map((mhs) => (
-                  <label key={mhs.id} className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-2xl cursor-pointer hover:border-bta-green transition-colors">
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 text-bta-green rounded border-gray-300 focus:ring-bta-green"
-                      checked={selectedMahasiswaIds.includes(mhs.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedMahasiswaIds([...selectedMahasiswaIds, mhs.id]);
-                        } else {
-                          setSelectedMahasiswaIds(selectedMahasiswaIds.filter(id => id !== mhs.id));
-                        }
-                      }}
-                    />
-                    <div>
-                      <p className="font-bold text-gray-800">{mhs.nama}</p>
-                      <p className="text-xs font-medium text-gray-500">{mhs.nim}</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-100 bg-white rounded-b-3xl flex justify-between items-center">
-              <span className="text-sm font-bold text-gray-500">{selectedMahasiswaIds.length} Terpilih</span>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setIsModalPesertaOpen(false)} className="px-5 py-2.5 text-gray-500 font-bold hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-200">Batal</button>
-                <button onClick={handleTambahPeserta} disabled={isLoadingAction || selectedMahasiswaIds.length === 0} className="px-6 py-2.5 bg-bta-green text-white font-black rounded-xl hover:bg-opacity-90 disabled:opacity-50">Masukkan ke Kelas</button>
-              </div>
-            </div>
-          </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsModalPesertaOpen(false)}></div>
+    <div className="relative bg-white rounded-3xl w-full max-w-2xl shadow-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
+      
+      {/* Header Modal */}
+      <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-black text-gray-800">Tambah Peserta ({selectedKelasTingkat})</h2>
+          <p className="text-xs text-gray-500 mt-1">Daftar mahasiswa hasil tes penempatan yang belum memiliki kelas.</p>
         </div>
+      </div>
+      
+      {/* Body Modal (Daftar Mahasiswa) */}
+      <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
+        {isFetchingPeserta ? (
+          <div className="flex flex-col items-center justify-center py-10 space-y-3">
+            <svg className="animate-spin h-8 w-8 text-bta-green" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span className="text-gray-500 font-bold text-sm">Mencari mahasiswa yang memenuhi syarat...</span>
+          </div>
+        ) : eligibleMahasiswa.length > 0 ? (
+          <div className="space-y-3">
+            {eligibleMahasiswa.map((mhs) => (
+              <label key={mhs.id} className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-2xl cursor-pointer hover:border-bta-green transition-colors">
+                <input 
+                  type="checkbox" 
+                  className="w-5 h-5 text-bta-green rounded border-gray-300 focus:ring-bta-green"
+                  checked={selectedMahasiswaIds.includes(mhs.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedMahasiswaIds([...selectedMahasiswaIds, mhs.id]);
+                    } else {
+                      setSelectedMahasiswaIds(selectedMahasiswaIds.filter(id => id !== mhs.id));
+                    }
+                  }}
+                />
+                <div className="flex-1">
+                  {/* Sesuaikan mhs.user.name atau mhs.nama tergantung JSON response dari backend kamu */}
+                  <p className="font-bold text-gray-800">{mhs.user?.name || mhs.nama}</p>
+                  <p className="text-xs font-medium text-gray-500">NIM: {mhs.nim}</p>
+                </div>
+                {/* Opsional: Tampilkan skor tes jika backend mengirimkannya */}
+                {mhs.nilai_tes && (
+                  <div className="text-right">
+                     <span className="bg-bta-yellow/20 text-yellow-700 font-black text-xs px-2.5 py-1 rounded-md">
+                       Skor: {mhs.nilai_tes}
+                     </span>
+                  </div>
+                )}
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <h3 className="text-gray-500 font-bold">Tidak ada mahasiswa tersedia.</h3>
+            <p className="text-gray-400 text-sm mt-1">Semua mahasiswa {selectedKelasTingkat} sudah mendapatkan kelas.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Modal */}
+      <div className="p-6 border-t border-gray-100 bg-white rounded-b-3xl flex justify-between items-center shrink-0">
+        <span className="text-sm font-bold text-gray-500">{selectedMahasiswaIds.length} Terpilih</span>
+        <div className="flex gap-3">
+          <button 
+            type="button" 
+            onClick={() => { setIsModalPesertaOpen(false); setSelectedMahasiswaIds([]); }} 
+            className="px-5 py-2.5 text-gray-500 font-bold hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-200 transition-colors"
+          >
+            Batal
+          </button>
+          <button 
+            onClick={handleTambahPeserta} 
+            disabled={isLoadingAction || selectedMahasiswaIds.length === 0} 
+            className="px-6 py-2.5 bg-bta-green text-white font-black rounded-xl hover:bg-opacity-90 disabled:opacity-50 transition-all flex items-center gap-2"
+          >
+            {isLoadingAction ? "Memproses..." : "Masukkan ke Kelas"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
       )}
 
     </div>
