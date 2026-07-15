@@ -35,16 +35,17 @@ const Login = () => {
     setErrorMessage("");
 
     try {
-      // 1. Tembak API Login (Kita tidak pakai csrf-cookie lagi karena menggunakan Bearer Token)
-      const response = await axiosInstance.post("/api/login", credentials);
+      const response = await axiosInstance.post("http://127.0.0.1:8000/api/login", credentials);
       
-      // 2. Simpan Kunci (Token) dan Data User ke Local Storage agar dikenali oleh Axios
+      // Simpan Kunci (Token) dan Data User
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
       if (response.data.user) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
       }
+      
+      // ... (logika role dan pengalihan halaman tetap sama)
       
       // 3. Logika Pengalihan Halaman Berdasarkan Role Spatie
       const userRole = response.data.user.role.toLowerCase().trim();
