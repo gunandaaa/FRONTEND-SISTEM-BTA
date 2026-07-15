@@ -18,14 +18,15 @@ function ManajemenTutor() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'Tutor' });
 
   // ==========================================
-  // FUNGSI API BACKEND
+  // FUNGSI API BACKEND (DIPERBAIKI DENGAN FULL URL)
   // ==========================================
   
   // 1. Ambil Data Tutor (GET)
   const fetchTutors = async () => {
     setIsFetching(true);
     try {
-      const response = await axiosInstance.get('/api/users');
+      // PENAMBAHAN FULL URL KE PORT 8000
+      const response = await axiosInstance.get('http://127.0.0.1:8000/api/users');
       // Filter hanya role 'Tutor'
       const dataTutor = response.data.data.filter(user => 
         user.roles.some(r => r.name === 'Tutor')
@@ -51,10 +52,12 @@ function ManajemenTutor() {
         if (!payload.password) {
           delete payload.password;
         }
-        await axiosInstance.put(`/api/users/${editId}`, payload);
+        // PENAMBAHAN FULL URL KE PORT 8000
+        await axiosInstance.put(`http://127.0.0.1:8000/api/users/${editId}`, payload);
       } else {
         // Jika Tambah
-        await axiosInstance.post('/api/users', formData);
+        // PENAMBAHAN FULL URL KE PORT 8000
+        await axiosInstance.post('http://127.0.0.1:8000/api/users', formData);
       }
       
       fetchTutors(); 
@@ -70,7 +73,8 @@ function ManajemenTutor() {
   const handleDelete = async (id) => {
     if (window.confirm("Yakin ingin menghapus tutor ini?")) {
       try {
-        await axiosInstance.delete(`/api/users/${id}`);
+        // PENAMBAHAN FULL URL KE PORT 8000
+        await axiosInstance.delete(`http://127.0.0.1:8000/api/users/${id}`);
         fetchTutors();
       } catch (error) {
         alert("Gagal menghapus: " + (error.response?.data?.message || "Terjadi kesalahan"));
