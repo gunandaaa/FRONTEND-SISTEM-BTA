@@ -17,6 +17,7 @@ export const roleMenus = {
             { label: "Kelola Kelas", path: "/admin/manajemen-kelas"},
             { label: "Nilai Tes", path: "/admin/tes-penempatan"},
             { label: "Validasi Slip Pembayaran", path: "/admin/validasi-administrasi"},
+            { label: "Pengaturan Sertifikat", path: "/admin/manajemen-sertifikat"},
         ]   
     },
     {

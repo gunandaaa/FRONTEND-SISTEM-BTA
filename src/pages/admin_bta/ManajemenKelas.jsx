@@ -132,7 +132,7 @@ function ManajemenKelas() {
     e.preventDefault();
     setIsLoadingAction(true);
     try {
-      await axiosInstance.post(`/api/admin/kelas/${selectedKelasId}/tutor`, { tutor_id: selectedTutorId });
+      await axiosInstance.post(`/api/admin/kelas/${selectedKelasId}/plot-tutor`, { tutor_id: selectedTutorId });
       fetchKelas(); // Refresh data agar nama tutor muncul di kartu
       setIsModalPlotOpen(false);
       setSelectedTutorId("");
@@ -150,7 +150,7 @@ function ManajemenKelas() {
     
     setIsLoadingAction(true);
     try {
-      await axiosInstance.post(`/api/admin/kelas/${selectedKelasId}/peserta`, { mahasiswa_id: selectedMahasiswaIds });
+      await axiosInstance.post(`/api/admin/kelas/${selectedKelasId}/tambah-peserta`, { mahasiswa_id: selectedMahasiswaIds });
       fetchKelas();
       setIsModalPesertaOpen(false);
       setSelectedMahasiswaIds([]);
