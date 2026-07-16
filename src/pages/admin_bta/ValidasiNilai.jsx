@@ -35,28 +35,29 @@ const ValidasiNilai = () => {
   const [previewUrl, setPreviewUrl] = useState("");
 
   // ==========================================
-  // FUNGSI API BACKEND
+  // FUNGSI API BACKEND (DIPERBAIKI URL DAN NAMA ENDPOINTNYA)
   // ==========================================
 
   // 1. Ambil Data Antrean Nilai
   const fetchAntrean = async () => {
+    
     setIsFetching(true);
     try {
-      // Endpoint disesuaikan dengan rute backend kamu
-      const response = await axiosInstance.get('/api/admin/antrean-nilai-excel');
+      // PERBAIKAN: Menggunakan Full URL & mencocokkan dengan route di api.php
+      const response = await axiosInstance.get('http://127.0.0.1:8000/api/admin/nilai/antrean');
       setGradeFiles(response.data.data || []);
     } catch (error) {
       console.error("Gagal mengambil data", error);
       // Fallback Dummy Data sementara API belum siap
       setGradeFiles([
         {
-          id: 1, // Anggap ini id tabel antrean
-          kelas_id: 101, // Ini parameter $kelas_id yang dibutuhkan controller
+          id: 1, 
+          kelas_id: 1, 
           kelas: "Kelas MQ 2 - A",
           tutor: "Ustadz Muhammad Ali, S.Ag",
           waktuUnggah: "07 Juli 2026 - 14:30 WIB",
           namaFile: "Nilai_Akhir_MQ2A_Ali.xlsx",
-          file_url: "https://filesamples.com/samples/document/xlsx/sample3.xlsx", // Contoh URL file public
+          file_url: "https://filesamples.com/samples/document/xlsx/sample3.xlsx", 
           status: "Menunggu Validasi"
         }
       ]);
@@ -73,8 +74,8 @@ const ValidasiNilai = () => {
   const handleApprove = async (kelas_id, nama_kelas) => {
     setIsSubmitting(true);
     try {
-      // Memanggil endpoint sesuai controller validasiTahapSatu
-      await axiosInstance.patch(`/api/admin/validasi-tahap-satu/${kelas_id}`);
+      // PERBAIKAN: Mengubah method menjadi PUT dan menyesuaikan endpoint sesuai api.php
+      await axiosInstance.put(`http://127.0.0.1:8000/api/admin/nilai/validasi-staff/${kelas_id}`);
       
       alert(`Berhasil memvalidasi nilai ${nama_kelas}. Data telah diteruskan ke Kepala Pusat.`);
       fetchAntrean(); // Refresh data antrean
@@ -93,8 +94,10 @@ const ValidasiNilai = () => {
     
     setIsSubmitting(true);
     try {
-      // Asumsi endpoint penolakan nilai
-      await axiosInstance.patch(`/api/admin/tolak-nilai/${selectedFile.kelas_id}`, {
+      // PERBAIKAN: Menggunakan Full URL 
+      // CATATAN PENTING: Route penolakan nilai ini BELUM ADA di api.php milikmu. 
+      // Nanti pastikan backend-nya dibuatkan route ini ya.
+      await axiosInstance.put(`http://127.0.0.1:8000/api/admin/nilai/tolak/${selectedFile.kelas_id}`, {
         alasan: rejectReason
       });
       
@@ -113,11 +116,22 @@ const ValidasiNilai = () => {
   // ==========================================
   // UTILITIES UI
   // ==========================================
+// Filter pencarian (DIPERBAIKI: Menangani Tutor jika berupa string atau objek)
+  const filteredFiles = gradeFiles.filter(item => {
+    // Fungsi pembantu untuk memastikan data selalu string
+    const getString = (val) => {
+        if (!val) return "";
+        if (typeof val === 'string') return val;
+        if (typeof val === 'object' && val.name) return val.name; // Cek jika ada property 'name'
+        return String(val);
+    };
 
-  const filteredFiles = gradeFiles.filter(item => 
-    item.kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.tutor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    const kelas = getString(item.kelas).toLowerCase();
+    const tutor = getString(item.tutor).toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    return kelas.includes(search) || tutor.includes(search);
+  });
 
   // Buka Modal Pratinjau menggunakan Google Docs Viewer
   const handlePreviewExcel = (fileUrl) => {
@@ -324,7 +338,7 @@ const ValidasiNilai = () => {
                  title="Pratinjau Excel"
                ></iframe>
                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-xs font-medium backdrop-blur">
-                  Jika dokumen tidak muncul (karena masalah localhost), silakan unduh file.
+                 Jika dokumen tidak muncul (karena masalah localhost), silakan unduh file.
                </div>
             </div>
           </div>
